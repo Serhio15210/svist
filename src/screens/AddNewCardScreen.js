@@ -1,0 +1,192 @@
+import React, {useEffect, useState} from 'react';
+import {useAuth} from "../provider/AuthProvider";
+import {useNavigation} from "@react-navigation/native";
+import {createCard, getCards} from "../api/authApi";
+import {Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import LoadingModal from "../components/LoadingModal";
+import {normalize} from "../responsive/fontSize";
+import AuthBackButton from "../../assets/authBackButton.svg";
+import CreditCard from "../../assets/creditCard.svg";
+import AuthWhiteButton from "../../assets/authWhiteButton.svg";
+import OutlineButton from "../../assets/outlineButton.svg";
+import ErrorModal from "../components/ErrorModal/ErrorModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import PaymentModal from "../components/PaymentModal/PaymentModal";
+import {GT} from "../constants/fonts";
+
+const AddNewCardScreen = ({setAddCard}) => {
+  const {
+    authToken,
+  } = useAuth();
+  const [errorEmail, setErrorEmail] = useState(false);
+  const [focusNumber, setFocusNumber] = useState(false);
+  const [focusDate, setFocusDate] = useState(false);
+  const [focusCVV, setFocusCVV] = useState(false);
+  const [openLoading, setOpenLoading] = useState(false);
+  const [openLink, setOpenLink] = useState(false);
+  const [openError, setOpenError] = useState(false);
+  const [cardId,setCardId]=useState('')
+  const [tryCount,setTryCount]=useState(0)
+  const [cardsLength,setCardsLength]=useState(0)
+  const navigation = useNavigation();
+  const [close,setClose]=useState(false)
+  const [url,setUrl]=useState('')
+  const cardCreate = () => {
+    createCard(authToken).then((res) => {
+      if (res.data.data.url){
+        // Linking.openURL(res.data.data.url).catch((err) =>
+        //   console.error('An error occurred', err),
+        // );
+        setUrl(res?.data?.data?.url)
+        setClose(true)
+        getCards(authToken).then((card) => {
+          setCardsLength(card?.data?.data?.length)
+          console.log(res?.data?.data)
+          setCardId(res?.data?.data)
+        })
+
+      }
+      // setFocusNumber(true)
+      // navigation.goBack()
+    });
+  };
+  const checkCard=()=>{
+    if (tryCount < 10) {
+
+      getCards(authToken).then((res) => {
+        console.log(res?.data?.data?.length, cardsLength)
+        if (res?.data?.data?.length > cardsLength) {
+          setOpenLoading(false)
+          setCardId('')
+          setTryCount(0)
+          setUrl('')
+          navigation.goBack()
+        } else {
+          setTryCount(tryCount + 1)
+          setOpenLoading(true)
+        }
+      })
+    } else {
+      setTryCount(0)
+      setCardId('')
+      setUrl('')
+      setOpenLoading(false)
+      setOpenError(true)
+    }
+  }
+  // useEffect(()=>{
+  //   if (url&&!close&&cardId) {
+  //     const timeout = setInterval(() => {
+  //       checkCard()
+  //     }, 1000)
+  //     return (() => clearInterval(timeout))
+  //   }
+  // },[cardId,tryCount,close,url])
+  useEffect(()=>{
+    if (url&&cardId&&!close) {
+      checkCard()
+    }
+  },[close,tryCount])
+  return (
+    <View
+      style={{
+        ...styles.container,
+        backgroundColor: errorEmail ? '#EF4E4E' : '#FE7B01',
+      }}>
+      {close&&url &&<PaymentModal isOpen={close} setIsOpen={setClose} url={url} setUrl={setUrl} />}
+      {openLoading&&!close && <LoadingModal setOpenLoading={setOpenLoading}/>}
+      {openError && !openLoading&&<ErrorModal isOpen={openError} setIsOpen={setOpenError} errorText={'Ошибка при добавлении карты'}/>}
+      <TouchableOpacity
+        style={{position: 'absolute', left: 0, top: normalize(48)}}
+        onPress={() => navigation.goBack()}>
+        <AuthBackButton/>
+      </TouchableOpacity>
+      <View style={{width: '100%'}}>
+        <Text style={styles.title}>Fill in age</Text>
+        <Text style={styles.text}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas
+          risus pellentesque.
+        </Text>
+        <CreditCard
+          style={{marginTop: normalize(40), alignSelf: 'center'}}
+          height={normalize(222)}
+        />
+      </View>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          openLink ? setOpenLoading(true) : cardCreate();
+        }}>
+          <OutlineButton/>
+        <Text
+          style={{
+            ...styles.buttonText,
+            color: 'white',
+          }}>
+          Add a new card
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+  );
+};
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FE7B01',
+    padding: normalize(24),
+    alignItems: 'center',
+    paddingTop: normalize(175),
+    justifyContent: 'space-between',
+    paddingBottom: normalize(40),
+  },
+  content: {
+    width: '100%',
+    marginTop: normalize(30),
+  },
+  centerBlock: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  button: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: normalize(60), position: 'absolute', bottom: normalize(32)
+  },
+  buttonText: {
+    position: 'absolute',
+    color: '#FE7B01',
+    fontSize: normalize(24),
+
+    fontFamily: GT,
+  },
+  title: {
+    fontSize: normalize(24),
+    color: 'white',
+    marginTop: normalize(24),
+    fontWeight: '500',
+    fontFamily: GT,
+  },
+  text: {
+    fontSize: normalize(16),
+    color: 'white',
+    alignSelf: 'center',
+    marginTop: normalize(16),
+  },
+  input: {
+    position: 'absolute',
+    color: 'white',
+    width: '100%',
+    paddingLeft: normalize(34),
+    fontSize: normalize(16),
+  },
+  errorText: {
+    alignSelf: 'center',
+    color: 'white',
+    fontSize: normalize(16),
+    marginTop: normalize(16),
+    fontFamily: GT,
+  },
+});
+
+export default AddNewCardScreen;

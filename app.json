@@ -1,0 +1,47 @@
+{
+  "expo": {
+    "name": "svist",
+    "slug": "svist",
+    "version": "1.0.4",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "com.svist",
+
+    "splash": {
+      "image": "./assets/splash.png",
+
+      "backgroundColor": "#FE7B01"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.svist",
+      "buildNumber": "5",
+      "config": {
+        "googleMapsApiKey": "AIzaSyAksIHv0l4hJaI-Fisf1APhfruEqfntwPk",
+        "googleSignIn": {
+          "reservedClientId": "com.googleusercontent.apps.77036362618-h84gth2hu6ac8coujuagr0b3u5bvmbkh"
+        }
+      }
+    },
+    "android": {
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCmCklCRbHgPYwZVYnnisi9giNbV6qj71Q"
+        }
+      },
+      "package": "com.svist",
+      "googleServicesFile": "./google-services.json"
+    },
+
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
