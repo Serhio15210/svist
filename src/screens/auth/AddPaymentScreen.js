@@ -25,7 +25,7 @@ const AddPaymentScreen = () => {
     setSurname,
     setEmail,
     setAge,
-    setCard,
+    setCard,i18n
   } = useAuth();
   const [errorEmail, setErrorEmail] = useState(false);
   const [openLoading, setOpenLoading] = useState(false);
@@ -102,18 +102,18 @@ const AddPaymentScreen = () => {
 
         {openLoading&&!close && <LoadingModal setOpenLoading={setOpenLoading} />}
         {close&&url &&<PaymentModal isOpen={close} setIsOpen={setClose} url={url} setUrl={setUrl} />}
-        {openError && !openLoading&& <ErrorModal isOpen={openError} setIsOpen={setOpenError} errorText={'Ошибка при добавлении карты'}/>}
+        {/*{openError && !openLoading&& <ErrorModal isOpen={openError} setIsOpen={setOpenError} errorText={i18n.t('arrorAddingCard')}/>}*/}
         <TouchableOpacity
           style={{position: 'absolute', left: 0, top: normalize(48)}}
           onPress={() => navigation.goBack()}>
           <AuthBackButton />
         </TouchableOpacity>
         <View style={{width: '100%'}}>
-          <Text style={styles.title}>Add a new card</Text>
-          <Text style={styles.text}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas
-            risus pellentesque.
-          </Text>
+          <Text style={styles.title}>{i18n.t('addPaymentCard')}</Text>
+          {/*<Text style={styles.text}>*/}
+          {/*  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas*/}
+          {/*  risus pellentesque.*/}
+          {/*</Text>*/}
           <CreditCard
             style={{marginTop: normalize(40), alignSelf: 'center'}}
             height={normalize(222)}
@@ -138,7 +138,7 @@ const AddPaymentScreen = () => {
               ...styles.buttonText,
               color: '#FE7B01'
             }}>
-            Add card
+            {i18n.t('addCard')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -160,7 +160,7 @@ const AddPaymentScreen = () => {
               ...styles.buttonText,
               color: 'white'
             }}>
-            Skip
+            {i18n.t('skip')}
           </Text>
         </TouchableOpacity>
         </View>

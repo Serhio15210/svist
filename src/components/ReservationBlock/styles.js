@@ -6,6 +6,86 @@ export const styles = StyleSheet.create({
   headerContainer:{
     backgroundColor: '#3772FF', borderRadius: 25, marginTop: normalize(15), paddingTop: normalize(18)
   },
+  arrowUp: {
+    borderTopWidth: 0,
+    borderRightWidth: 30,
+    borderBottomWidth: 30,
+    borderLeftWidth: 30,
+    borderTopColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: "tomato",
+    borderLeftColor: 'transparent',
+  },
+  arrowRight: {
+    borderTopWidth: 30,
+    borderRightWidth: 0,
+    borderBottomWidth: 30,
+    borderLeftWidth: "tomato",
+    borderTopColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderLeftColor: "tomato",
+  },
+  arrowDown: {
+    borderTopWidth: 30,
+    borderRightWidth: 30,
+    borderBottomWidth: 0,
+    borderLeftWidth: 30,
+    borderTopColor: "tomato",
+    borderRightColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderLeftColor: 'transparent',
+  },
+  arrowLeft: {
+    borderTopWidth: 30,
+    borderRightWidth: "tomato",
+    borderBottomWidth: 30,
+    borderLeftWidth: 0,
+    borderTopColor: 'transparent',
+    borderRightColor: "tomato",
+    borderBottomColor: 'transparent',
+    borderLeftColor: 'transparent',
+  },
+  arrowUpLeft: {
+    borderTopWidth: 30,
+    borderRightWidth: "tomato",
+    borderBottomWidth: 0,
+    borderLeftWidth: 0,
+    borderTopColor: "tomato",
+    borderRightColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderLeftColor: 'transparent',
+  },
+  arrowUpRight: {
+    borderTopWidth: 0,
+    borderRightWidth: "tomato",
+    borderBottomWidth: 30,
+    borderLeftWidth: 0,
+    borderTopColor: 'transparent',
+    borderRightColor: "tomato",
+    borderBottomColor: 'transparent',
+    borderLeftColor: 'transparent',
+  },
+  arrowDownLeft: {
+    borderTopWidth: 30,
+    borderRightWidth: 0,
+    borderBottomWidth: 0,
+    borderLeftWidth: "tomato",
+    borderTopColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: 'transparent',
+    borderLeftColor: "tomato",
+  },
+  arrowDownRight: {
+    borderTopWidth: 0,
+    borderRightWidth: 0,
+    borderBottomWidth: 30,
+    borderLeftWidth: "tomato",
+    borderTopColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderBottomColor: "tomato",
+    borderLeftColor: 'transparent',
+  },
   triangle: {
     width: 0,
     height: 0,
@@ -95,6 +175,14 @@ export const styles = StyleSheet.create({
 
 
   },
+  reserveRow:{
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    borderBottomWidth: 1,
+    borderColor: "#EDEDF1",
+    paddingBottom: normalize(14),
+  },
   reserveTitle: {
     fontFamily: GT,
     fontSize: normalize(24),
@@ -129,5 +217,24 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: normalize(8)
+  },
+  scooterImg:{
+    width: normalize(48), height: normalize(48)
+  },
+  ongoingText:{
+    color: 'white', marginLeft: normalize(18), fontSize: normalize(16)
+  },
+  stopReserveButton:{
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    alignSelf: 'center',
+    marginTop: normalize(35)
+  },
+  cancelText:{
+    fontSize: normalize(24),
+    color: '#EF4E4E',
+    fontFamily: GT,
+    position: 'absolute'
   }
 });

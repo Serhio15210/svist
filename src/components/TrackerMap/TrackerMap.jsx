@@ -6,6 +6,7 @@ import {normalize} from "../../responsive/fontSize";
 import {useSvistContext} from "../../provider/SvistProvider";
 import {GT} from "../../constants/fonts";
 import LoadingModal from "../LoadingModal";
+import MapPolygon from "../MapPolygon";
 
 const LATITUDE_DELTA = 0.05;
 const LONGITUDE_DELTA = 0.05;
@@ -23,32 +24,27 @@ const TrackerMap = ({scooter,polygons,startPosition,rideArea,startRide}) => {
       if (markerRef.current) {
         markerRef.current.animateMarkerToCoordinate(newCoordinate, 2000);
         startPosition.timing(newCoordinate).start();
-        mapRef.current.animateToRegion({
-          ...newCoordinate, latitudeDelta: LATITUDE_DELTA,
-          longitudeDelta: LONGITUDE_DELTA
-        }, 2000)
+
       }
     } else {
-      startPosition.timing(newCoordinate).start();
+      startPosition.timing({
+        ...newCoordinate,
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA
+      }).start();
     }
+    mapRef.current.animateToRegion({
+      ...newCoordinate,
+      latitudeDelta: LATITUDE_DELTA,
+      longitudeDelta: LONGITUDE_DELTA
+    }, 2000)
   }
-  function hexToRgbA(hex) {
-    let c;
-    if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
-      c = hex.substring(1).split('');
-      if (c.length === 3) {
-        c = [c[0], c[0], c[1], c[1], c[2], c[2]];
-      }
-      c = '0x' + c.join('');
-      return 'rgba(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(',') + ',0.24)';
-    }
-    throw new Error('Bad Hex');
-  }
+
   return (
     <MapView
           ref={mapRef}
           style={styles.map}
-          provider={PROVIDER_GOOGLE}
+          // provider={PROVIDER_GOOGLE}
           initialRegion={{
             latitude: parseFloat(selectScooter?.latitude), longitude: parseFloat(selectScooter?.longitude),
             latitudeDelta: LATITUDE_DELTA,
@@ -63,9 +59,7 @@ const TrackerMap = ({scooter,polygons,startPosition,rideArea,startRide}) => {
             <TrackingMarker rideArea={rideArea} startRide={startRide} selectScooter={selectScooter}/>
           </Marker.Animated>
           {polygons.length > 0 && polygons?.map(item =>
-            <Polygon key={item?.id} tappable={true} coordinates={item?.polygon} fillColor={hexToRgbA(item?.color)}
-                     strokeColor={item?.color}
-                     strokeWidth={2}/>)}
+            <MapPolygon item={item} key={item?.id}/>)}
         </MapView>
   );
 };

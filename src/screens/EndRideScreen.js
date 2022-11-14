@@ -19,7 +19,7 @@ import * as RNFS from "expo-file-system";
 
 const EndRideScreen = () => {
   const [openCamera, setOpenCamera] = useState(false)
-  const {authToken} = useAuth()
+  const {authToken,i18n} = useAuth()
   const {selectScooter, picture, setPicture} = useSvistContext()
   const navigation = useNavigation()
   const [cameraAllow, setCameraAllow] = useState(false)
@@ -28,7 +28,7 @@ const EndRideScreen = () => {
   const [takePicture, setTakePicture] = useState(false)
   const checkPermission = () => {
     const [status, requestPermission] = Camera.useCameraPermissions()
-    console.log('status',status)
+    // console.log('status',status)
   }
   const checkAllow=()=>{
     return Camera.getCameraPermissionsAsync().then(res=>{
@@ -43,10 +43,9 @@ const EndRideScreen = () => {
         setCameraAllow(true)
       }
     })
+
   }, [])
-  useEffect(()=>{
-    console.log(picture?.uri)
-  },[picture])
+  console.log('picture?.uri', picture?.uri)
   return (
     <View style={styles.container}>
       {/*<TouchableOpacity style={{position: 'absolute', left: 0, top: normalize(50)}} onPress={() => navigation.goBack()}>*/}
@@ -56,7 +55,7 @@ const EndRideScreen = () => {
         <CameraModal isOpen={openCamera} setIsOpen={setOpenCamera} picture={picture} setPicture={setPicture}/>}
       {cameraAllow && <AllowCameraModal setIsOpen={setCameraAllow} isOpen={cameraAllow} checkPermission={checkPermission} close={true}/>}
       <View style={{paddingLeft: normalize(24), paddingRight: normalize(24)}}>
-        <Text style={styles.title}>Check the scooter</Text>
+        <Text style={styles.title}>{i18n.t('checkScooter')}</Text>
         <View style={styles.checkBlock}>
           <View style={{
             ...styles.checkItem,
@@ -66,8 +65,7 @@ const EndRideScreen = () => {
           }}  >
             <Entypo name={'check'} style={{color: 'white'}}/>
           </View>
-          <Text style={{fontSize: normalize(16)}} numberOfLines={1} adjustsFontSizeToFit={true}>Koloběžka je
-            na stojánku</Text>
+          <Text style={{fontSize: normalize(16)}} numberOfLines={1} adjustsFontSizeToFit={true}>{i18n.t('scooterOnKickstand')}</Text>
         </View>
         <View style={styles.checkBlock}>
           <View style={{
@@ -78,8 +76,7 @@ const EndRideScreen = () => {
           }}  >
             <Entypo name={'check'} style={{color: 'white'}}/>
           </View>
-          <Text style={{fontSize: normalize(16)}} numberOfLines={2}  adjustsFontSizeToFit={true}>Koloběžka
-            nebrání cyklistům, ani vchodům, ani silnicím.</Text>
+          <Text style={{fontSize: normalize(16)}} numberOfLines={2}  adjustsFontSizeToFit={true}>{i18n.t('scooterNotObstruct')}</Text>
         </View>
       </View>
       <View>
@@ -99,8 +96,7 @@ const EndRideScreen = () => {
           }} onPress={()=>setPicture('')}>
             <Entypo name={'check'} style={{color: picture?.uri ? 'white' : '#FE7B01'}}/>
           </TouchableOpacity>
-          <Text style={{fontSize: normalize(16)}} numberOfLines={1} adjustsFontSizeToFit={true}>Take a picture
-            of the scooter</Text>
+          <Text style={{fontSize: normalize(16)}} numberOfLines={1} adjustsFontSizeToFit={true}>{i18n.t('takePictureScooter')}</Text>
         </View>
         <TouchableOpacity style={styles.imagePickBlock} onPress={() => {
            checkAllow().then(res=>{
@@ -113,18 +109,22 @@ const EndRideScreen = () => {
 
 
         }}>
-          <Image source={{uri: picture?.uri}} width={'100%'} height={'100%'} style={{borderRadius: 20}}/>
+          <Image source={{uri: picture?.uri}} style={{borderRadius: 20, width: 131, height: 131}}/>
           {picture?.uri ? <AddedPicture style={{position: 'absolute'}}/> : <AddPicture style={{position: 'absolute'}}/>}
         </TouchableOpacity>
       </View>
       <TouchableOpacity style={{...styles.startButtonBlock, alignSelf: 'center'}} onPress={() => {
         if (picture?.uri)  {
-          navigation.navigate('ResultScreen')
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'MainScreen'},{name: 'ResultScreen'}],
+          })
+
         }
       }}>
         {picture ? <ReserveFocusButton width={'100%'} height={normalize(56)}/> :
           <ReserveButton width={'100%'} height={normalize(56)}/>}
-        <Text style={{...styles.buttonText, color: picture ? 'white' : '#FE7B01'}}>End the ride</Text>
+        <Text style={{...styles.buttonText, color: picture ? 'white' : '#FE7B01'}}>{i18n.t('endRide')}</Text>
       </TouchableOpacity>
     </View>
   );

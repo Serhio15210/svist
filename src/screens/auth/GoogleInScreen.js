@@ -21,7 +21,7 @@ const GoogleInScreen = () => {
   const [isValidNumber, setIsValidNumber] = useState(true)
   const [errorText, setErrorText] = useState('')
   const inputEl = useRef(null);
-  const {phone,setPhone,isNewUser, setIsNewUser,isSent, setIsSent,appToken,user,setUser}=useAuth()
+  const {phone,setPhone,isNewUser, setIsNewUser,isSent, setIsSent,appToken,user,setUser,i18n}=useAuth()
   const navigation = useNavigation()
 
   const sentPhone=()=>{
@@ -66,7 +66,7 @@ const GoogleInScreen = () => {
             defaultCode={'SK'}
             containerStyle={styles.phoneInputContainer}
             codeTextStyle={{color: 'white',fontSize:normalize(16)}}
-            placeholder={'Zadejte telefonní číslo'}
+            placeholder={i18n.t('inputPhoneNumber')}
             textInputStyle={{color: 'white', padding: 0,fontSize:normalize(16)}}
             textContainerStyle={styles.phoneInputText}
             countryPickerButtonStyle={{color: 'white', fontSize:normalize(16)}}
@@ -83,12 +83,12 @@ const GoogleInScreen = () => {
         </View>
 
       </View>
-      {errorText?<Text style={{alignSelf:'center',color:'white',fontSize:normalize(16),fontFamily:GT,textAlign:'center',marginTop:normalize(5) }}>{errorText||'Invalid number'}</Text>:<></>}
+      {errorText?<Text style={{alignSelf:'center',color:'white',fontSize:normalize(16),fontFamily:GT,textAlign:'center',marginTop:normalize(5) }}>{errorText||i18n.t('invalidPhoneNumber')}</Text>:<></>}
       <TouchableOpacity style={{...styles.centerBlock, marginTop: normalize(16)}} onPress={()=>{
         isSent===0&&sentPhone()
       }} accessible={!isSent}>
         {phone?<AuthWhiteButton width={normalize(342)} />:<OutlineButton width={normalize(342)}/>}
-        <Text style={{...styles.buttonText,color:phone?isValidNumber?'#FE7B01':'#EF4E4E':'white'}}>Continue</Text>
+        <Text style={{...styles.buttonText,color:phone?isValidNumber?'#FE7B01':'#EF4E4E':'white'}}>{i18n.t('continue')}</Text>
       </TouchableOpacity>
 
 

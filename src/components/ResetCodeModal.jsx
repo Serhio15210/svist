@@ -9,10 +9,11 @@ import {useNavigation} from "@react-navigation/native";
 import {useAuth} from "../provider/AuthProvider";
 import {validationPhone} from "../api/authApi";
 import {GT} from "../constants/fonts";
+import CloseIcon from "../../assets/closeIcon.svg";
 
 const ResetCodeModal = ({setIsOpen, isOpen,setResetTime,setCode,setErrorText}) => {
   const navigation=useNavigation()
-  const {phone,setPhone,appToken}=useAuth()
+  const {phone,setPhone,appToken,i18n}=useAuth()
   const resetCode=()=>{
     setCode('')
     setErrorText(null)
@@ -31,9 +32,9 @@ const ResetCodeModal = ({setIsOpen, isOpen,setResetTime,setCode,setErrorText}) =
         setIsOpen(!isOpen);
       }}>
       <Pressable style={styles.container} onPress={()=>setIsOpen(false)}>
-        <AntDesign name={'closesquareo'}
-                   style={{position: 'absolute', top: 30, right: 20, fontSize: 24, color: 'white'}}
-                   onPress={() => setIsOpen(false)}/>
+        <CloseIcon
+          style={{position: 'absolute', top: 30, right: 20, fontSize: 24, color: 'white'}}
+          onPress={() => setIsOpen(false)}/>
         <View style={styles.content}>
           <TouchableOpacity onPress={()=>{
             resetCode()
@@ -41,7 +42,7 @@ const ResetCodeModal = ({setIsOpen, isOpen,setResetTime,setCode,setErrorText}) =
             setIsOpen(false)
           }} style={{flexDirection:'row',alignItems:'center',borderBottomWidth:1,paddingBottom:normalize(16),borderColor:'#DEDEDE',marginTop:normalize(18)}}>
           <Message/>
-            <Text style={{fontWeight:'500',fontFamily: GT,marginLeft:normalize(26)}}>Resend code via SMS</Text>
+            <Text style={{fontWeight:'500',fontFamily: GT,marginLeft:normalize(26)}}>{i18n.t('resendSmsCode')}</Text>
           </TouchableOpacity>
           {/*<TouchableOpacity style={{flexDirection:'row',alignItems:'center',borderBottomWidth:1,paddingBottom:normalize(16),borderColor:'#DEDEDE',marginTop:normalize(18)}}>*/}
           {/*  <Feather name={'phone'} style={{fontSize: normalize(24)}}/>*/}

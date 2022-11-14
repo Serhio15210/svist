@@ -1,12 +1,16 @@
 import React from 'react';
 import {Modal, Text, TouchableOpacity, View} from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
-import ModalHeader from "../../../assets/modalHeader.svg";
 import {normalize} from "../../responsive/fontSize";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import ModalButton from "../../../assets/modalButton.svg";
 import {styles} from "./styles"
+import CloseIcon from "../../../assets/closeIcon.svg";
+import {useAuth} from "../../provider/AuthProvider";
+import {useNavigation} from "@react-navigation/native";
+import CloseButton from "../CloseButton";
+
 const ErrorModal = ({setIsOpen, isOpen,errorText}) => {
+  const {i18n}=useAuth()
+  const navigation=useNavigation()
   return (
     <Modal
       animationType="slide"
@@ -16,24 +20,25 @@ const ErrorModal = ({setIsOpen, isOpen,errorText}) => {
         setIsOpen(!isOpen);
       }}>
       <View style={styles.container}>
-        <AntDesign name={'closesquareo'}
-                   style={{position: 'absolute', top: 30, right: 20, fontSize: 24, color: 'white'}}
-                   onPress={() => setIsOpen(false)}/>
+        <CloseButton onPress={() => setIsOpen(false)}/>
         <View style={styles.modalBlock}>
           {/*<View style={styles.logoBlock}>*/}
           {/*  <ModalHeader width={normalize(58)} height={normalize(48)}/>*/}
           {/*  <MaterialIcons name={'gps-off'} style={{fontSize: normalize(24), color: 'white', position: 'absolute'}}/>*/}
           {/*</View>*/}
 
-          <Text style={styles.title}>Error</Text>
+          <Text style={styles.title}>{i18n.t('error')}</Text>
            <Text style={styles.text}>{errorText||''}</Text>
           <TouchableOpacity
             style={styles.button}
             onPress={() => {
-              setIsOpen(false)
+              if (errorText === 'Поездка не найдена'||errorText ==='Jazda sa nenašla'||errorText ==='Подорож не було знайдено'||errorText ==='The trip was not found') {
+                navigation.navigate('MainScreen')
+              }
+                setIsOpen(false)
             }}>
             <ModalButton width={'100%'} height={normalize(56)}/>
-            <Text style={styles.buttonText}>Close</Text>
+            <Text style={styles.buttonText}>{i18n.t('close')}</Text>
 
           </TouchableOpacity>
 

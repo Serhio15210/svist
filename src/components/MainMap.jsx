@@ -146,6 +146,8 @@ const MainMap = ({
                                     mapRef?.current?.animateToCoordinate({
                                       latitude: coordinates.latitude,
                                       longitude: coordinates.longitude,
+                                      latitudeDelta: 0.05,
+                                      longitudeDelta: 0.05,
                                     }, 1000)
                                   }
                                 } else {

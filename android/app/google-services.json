@@ -1,33 +1,86 @@
 {
   "project_info": {
-    "project_number": "548531888383",
-    "project_id": "test-e0c0b",
-    "storage_bucket": "test-e0c0b.appspot.com"
+    "project_number": "548272860578",
+    "project_id": "signin-573bc",
+    "storage_bucket": "signin-573bc.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:548531888383:android:f84440bef5294005dbecca",
+        "mobilesdk_app_id": "1:548272860578:android:653609db79d2b089d216fb",
         "android_client_info": {
-          "package_name": "com.svist"
+          "package_name": "com.serhio15210.googleSignIn"
         }
       },
       "oauth_client": [
         {
-          "client_id": "351919190833-hg0om2bpl7goa353s8koocg5711sqaql.apps.googleusercontent.com",
+          "client_id": "548272860578-3i0pjalj8fkcjuade652s39it3l4r8qj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.serhio15210.googleSignIn",
+            "certificate_hash": "52c75f366f218818459f84c01bfc31bf89c494d1"
+          }
+        },
+        {
+          "client_id": "548272860578-s267kd0i2f9gntd7q204gdha43c4tqak.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.serhio15210.googleSignIn",
+            "certificate_hash": "0b6412bcc267bea71cfe6c22ee0d7f0ffb249023"
+          }
+        },
+        {
+          "client_id": "548272860578-niu3sn2ger5c1pef9lsnblvhg491a0os.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBUYzxnQcMrArOy9IZ2MS4-5aGTNDTAADw"
+          "current_key": "AIzaSyDwPArxqWXlY_Q6jsW2Sk03zwbwJBwcBfg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "351919190833-hg0om2bpl7goa353s8koocg5711sqaql.apps.googleusercontent.com",
+              "client_id": "548272860578-niu3sn2ger5c1pef9lsnblvhg491a0os.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:548272860578:android:c36f0329a1c27bbfd216fb",
+        "android_client_info": {
+          "package_name": "com.svist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "548272860578-ccqh3ii5oiptrqoi8r4433qfq4i8np44.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.svist",
+            "certificate_hash": "e036133082c3d772f97339e216554ae0fbb95ad6"
+          }
+        },
+        {
+          "client_id": "548272860578-niu3sn2ger5c1pef9lsnblvhg491a0os.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwPArxqWXlY_Q6jsW2Sk03zwbwJBwcBfg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "548272860578-niu3sn2ger5c1pef9lsnblvhg491a0os.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

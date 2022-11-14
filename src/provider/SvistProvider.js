@@ -14,9 +14,11 @@ const SvistProvider = ({children}) => {
   const [isConnectedErrorOpen, setIsConnectedErrorOpen] = useState(false);
   const [isConnectedError, setIsConnectedError] = useState(false);
   const [dangerZoneOpen, setDangerZoneOpen] = useState(false)
-  const [picture, setPicture] = useState(null)
+  const [redZoneOpen, setRedZoneOpen] = useState(false)
+  const [picture, setPicture] = useState({})
   const [claimFreeRide, setClaimFreeRide] = useState(false)
   const [reservation, setReservation] = useState(false)
+  const [isFirstRide, setIsFirstRide] = useState(false)
   const netInfo = useNetInfo();
   useEffect(() => {
     let isMount = true
@@ -62,10 +64,26 @@ const SvistProvider = ({children}) => {
         setIsConnectedErrorOpen,
         isConnectedError,
         setIsConnectedError,
-        endRide, setEndRide,
-        dangerZoneOpen, setDangerZoneOpen,
-        pauseTime, setPauseTime,
-        selectScooter, setSelectScooter, picture, setPicture, claimFreeRide, setClaimFreeRide, rideChange, setRideChange,reservation, setReservation
+        endRide,
+        setEndRide,
+        dangerZoneOpen,
+        setDangerZoneOpen,
+        pauseTime,
+        setPauseTime,
+        redZoneOpen,
+        setRedZoneOpen,
+        isFirstRide,
+        setIsFirstRide,
+        selectScooter,
+        setSelectScooter,
+        picture,
+        setPicture,
+        claimFreeRide,
+        setClaimFreeRide,
+        rideChange,
+        setRideChange,
+        reservation,
+        setReservation
       }), [
         rideArea,
         setRideArea,
@@ -81,7 +99,7 @@ const SvistProvider = ({children}) => {
         setIsConnectedError,
         endRide, setEndRide,
         dangerZoneOpen, setDangerZoneOpen,
-        pauseTime, setPauseTime,
+        pauseTime, setPauseTime, redZoneOpen, setRedZoneOpen, isFirstRide, setIsFirstRide,
         selectScooter, setSelectScooter, picture, setPicture, claimFreeRide, setClaimFreeRide, rideChange, setRideChange, reservation, setReservation
       ])}>
       {children}

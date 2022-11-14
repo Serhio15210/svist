@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import DrawerMenuButton from "../components/DrawerMenuButton";
 import MapView, {PROVIDER_GOOGLE} from "react-native-maps";
-import {Modal, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {BackHandler, Modal, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {normalize} from "../responsive/fontSize";
 import MiniEndRide from "../../assets/miniEndRide.svg"
 import MiniSamokat from "../../assets/miniSamokat.svg"
@@ -22,30 +22,49 @@ import {GT} from "../constants/fonts";
 import * as RNFS from "expo-file-system";
 const ResultScreen = () => {
   const [openResult, setOpenResult] = useState(false)
-
+  const navigation=useNavigation()
+  const {i18n}=useAuth()
+  useEffect(()=>{
+    if (navigation.isFocused()){
+      setOpenResult(true)
+    }else {
+      setOpenResult(false)
+    }
+  },[navigation])
   return (
     <View style={styles.container}>
       <DrawerMenuButton/>
-      <ResultModal/>
+      <ResultModal open={openResult} setOpen={setOpenResult}/>
       <MapView
-        provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+        // provider={PROVIDER_GOOGLE} // remove if not using Google Maps
         style={styles.map}
         initialRegion={{
           latitude: 37.78825, longitude: -122.4324,
-          latitudeDelta: 0.015,
-          longitudeDelta: 0.0121,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05
         }}
       >
       </MapView>
     </View>
   )
 };
-const ResultModal = () => {
+const ResultModal = ({open,setOpen}) => {
   const {rideTime, pauseTime} = useSvistContext()
+  const {i18n}=useAuth()
   const [rating, setRating] = useState(0)
   const {picture, setPicture, selectScooter,setSelectScooter} = useSvistContext()
   const {authToken} = useAuth()
   const navigation = useNavigation()
+  function handleBackButtonClick() {
+    setPicture({})
+    setSelectScooter({})
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'MainScreen'}],
+    })
+    return true;
+  }
+
   const sendRatingTrip = (rating) => {
     setRatingTrip(authToken, selectScooter?.tripId || selectScooter?.id, rating, picture).then(res => {
       console.log(res)
@@ -65,17 +84,21 @@ const ResultModal = () => {
         setSelectScooter(res)
       }
     })
-
+    BackHandler.addEventListener("hardwareBackPress", handleBackButtonClick);
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackButtonClick);
+    };
   },[])
   return (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={true}
-    >
+    // <Modal
+    //   animationType="slide"
+    //   transparent={true}
+    //
+    //   visible={open}
+    // >
       <View style={styles.resultBlock}>
         <View style={{padding: normalize(24), paddingBottom: normalize(30)}}>
-          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit={true}>Your ride ended</Text>
+          <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit={true}>{i18n.t('yourRideHasEnded')}</Text>
           <Text style={styles.text} numberOfLines={1} adjustsFontSizeToFit={true}>{selectScooter?.endTime}</Text>
           <View style={{
             flexDirection: 'row',
@@ -88,8 +111,8 @@ const ResultModal = () => {
             <View style={{width: '80%'}}>
               <View style={{width: '100%', height: 1, backgroundColor: 'white'}}/>
               <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between'}}>
-                <Text style={{...styles.text, fontSize: normalize(12)}}>Pick up</Text>
-                <Text style={{...styles.text, fontSize: normalize(12)}}>End of ride</Text>
+                <Text style={{...styles.text, fontSize: normalize(12)}}>{i18n.t('pickUp')}</Text>
+                <Text style={{...styles.text, fontSize: normalize(12)}}>{i18n.t('endRide')}</Text>
               </View>
             </View>
             <MiniEndRide width={normalize(31)} height={normalize(24)}/>
@@ -100,7 +123,7 @@ const ResultModal = () => {
               <PlayIcon style={{marginRight: normalize(18)}}/>
               <Text style={styles.number} adjustsFontSizeToFit={true}
                     numberOfLines={1}>{Math.floor((selectScooter?.duration / 60) * 100) / 100}<Text
-                style={{...styles.text}}> min.</Text></Text>
+                style={{...styles.text}}> {i18n.t('min')}.</Text></Text>
             </View>
 
             <View style={{...styles.rowContainer, marginTop: normalize(30)}}>
@@ -117,13 +140,13 @@ const ResultModal = () => {
               <Min style={{marginRight: normalize(18)}}/>
               <Text style={styles.number} adjustsFontSizeToFit={true}
                     numberOfLines={1}>{Math.floor((pauseTime / 60) * 100) / 100}<Text
-                style={{...styles.text}}> min.</Text></Text>
+                style={{...styles.text}}> {i18n.t('min')}.</Text></Text>
             </View>
             <View style={{...styles.rowContainer, marginTop: normalize(30)}}>
               <Routes/>
               <Text style={{...styles.number, marginLeft: normalize(18)}} adjustsFontSizeToFit={true}
-                    numberOfLines={1}>{Math.ceil((selectScooter?.distance / 1000) )}<Text
-                style={{...styles.text}}> km.</Text></Text>
+                    numberOfLines={1}>{selectScooter?.distance_formated}<Text
+                style={{...styles.text}}> {i18n.t('km')}.</Text></Text>
             </View>
 
           </View>
@@ -133,17 +156,17 @@ const ResultModal = () => {
             sendRatingTrip(2)
           }}>
             <BadRide/>
-            <Text style={styles.buttonText}>Bad ride</Text>
+            <Text style={styles.buttonText}>{i18n.t('badRide')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={{alignItems: 'center', marginLeft: normalize(24)}} onPress={() => {
             sendRatingTrip(5)
           }}>
             <GoodRide/>
-            <Text style={styles.buttonText}>Good ride</Text>
+            <Text style={styles.buttonText}>{i18n.t('goodRide')}</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </Modal>
+    // </Modal>
   )
 }
 const styles = StyleSheet.create({
@@ -167,6 +190,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 0,
     width: '100%',
+    zIndex:1000
 
 
   },

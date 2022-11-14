@@ -6,7 +6,11 @@ import ModalHeader from "../../../assets/modalHeader.svg";
 import Feather from "react-native-vector-icons/Feather";
 import ModalButton from "../../../assets/modalButton.svg";
 import {styles} from "./styles";
+import CloseIcon from "../../../assets/closeIcon.svg";
+import {useAuth} from "../../provider/AuthProvider";
+import CloseButton from "../CloseButton";
 const FirstPauseModal = ({setIsOpen, isOpen}) => {
+  const{i18n}=useAuth()
   return (
     <Modal
       animationType="slide"
@@ -16,22 +20,19 @@ const FirstPauseModal = ({setIsOpen, isOpen}) => {
         setIsOpen(!isOpen);
       }}>
       <View style={styles.container}>
-        <AntDesign name={'closesquareo'}
-                   style={{position: 'absolute', top: 30, right: 20, fontSize: 24, color: 'white'}}
-                   onPress={() => setIsOpen(false)}/>
+        <CloseButton onPress={() => setIsOpen(false)}/>
         <View style={styles.modalBlock}>
           <View style={styles.logoBlock}>
             <ModalHeader width={normalize(58)} height={normalize(48)}/>
             <Feather name={'pause'} style={{fontSize: normalize(24), color: 'white', position: 'absolute'}}/>
           </View>
-          <Text style={styles.title}>Pozastavit jazdu?</Text>
-          <Text style={styles.text}>Pozastavenie jazdy dočasne zamkne vozidlo takže budeš mocť pokračovať v jazde
-            neskor. Sadzba za pauzu je aplikovaná po dobu uzamknutia.</Text>
+          <Text style={styles.title}>{i18n.t('Pozastaviť jazdu?')}</Text>
+          <Text style={styles.text}>{i18n.t('pauseTemporarilyLock')}</Text>
           <TouchableOpacity
             style={styles.button}
             onPress={() => setIsOpen(false)}>
             <ModalButton width={normalize(326)} height={normalize(56)}/>
-            <Text style={styles.buttonText}>Dočasne uzamknúť</Text>
+            <Text style={styles.buttonText}>{i18n.t('pause')}</Text>
           </TouchableOpacity>
         </View>
       </View>

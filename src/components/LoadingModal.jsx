@@ -5,7 +5,7 @@ import {useAuth} from '../provider/AuthProvider';
 import {GT} from "../constants/fonts";
 
 const LoadingModal = ({setOpenLoading}) => {
-  const {setIsAuth,authToken}=useAuth()
+  const {setIsAuth,authToken,i18n}=useAuth()
   // useEffect(()=>{
   //   const timeout=setTimeout(()=>{
   //     console.log(authToken)
@@ -34,7 +34,7 @@ const LoadingModal = ({setOpenLoading}) => {
           {/*/>*/}
           <Image source={require('../../assets/loadingAnimation.gif')} style={{height:normalize(150),width:normalize(250)}}/>
 
-          <Text style={styles.text}>Loading</Text>
+          <Text style={styles.text}>{i18n.t('loading')}</Text>
         </View>
       </View>
     </Modal>

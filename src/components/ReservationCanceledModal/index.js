@@ -6,32 +6,39 @@ import {normalize} from "../../responsive/fontSize";
 import ModalHeader from "../../../assets/modalHeader.svg";
 import ModalButton from "../../../assets/modalButton.svg";
 import {styles} from "./styles";
+import CloseIcon from "../../../assets/closeIcon.svg";
+import {useAuth} from "../../provider/AuthProvider";
+import CloseButton from "../CloseButton";
 const ReservationCanceledModal = ({setIsOpen, isOpen,setReservation}) => {
+  const {i18n}=useAuth()
   return (
     <Modal
       animationType="slide"
       transparent={true}
       visible={isOpen}
       onRequestClose={() => {
-        setIsOpen(!isOpen);
+        setReservation(false)
+        setIsOpen(false);
       }}>
       <View style={styles.container}>
-        <AntDesign name={'closesquareo'} style={{position:'absolute',top:30,right:20,fontSize: 24,color:'white'}} onPress={()=>{
+        <CloseButton onPress={() => {
           setReservation(false)
           setIsOpen(false)
         }}/>
+
+
         <View style={styles.modalBlock}>
           <View style={styles.logoBlock}>
             <ModalHeader width={normalize(58)} height={normalize(48)}/>
             <AntDesign name={'closecircleo'} style={{fontSize: normalize(24),color:'white',position:'absolute'}}/>
           </View>
-          <Text style={styles.title}>Reservation cancelled</Text>
+          <Text style={styles.title}>{i18n.t('reservationCanceled')}</Text>
           <TouchableOpacity style={styles.button} onPress={()=> {
             setIsOpen(false)
             setReservation(false)
           }}>
             <ModalButton  width={normalize(326)} height={normalize(56)}/>
-            <Text style={styles.buttonText}>Continue</Text>
+            <Text style={styles.buttonText}>{i18n.t('continue')}</Text>
           </TouchableOpacity>
 
         </View>

@@ -1,14 +1,14 @@
 import React, {useRef} from 'react';
-import {Image, Modal, Text, TouchableOpacity, View} from "react-native";
+import {Modal, Text, TouchableOpacity, View} from "react-native";
 import {WebView} from "react-native-webview";
-import MainButton from "../../../assets/mainButton.svg";
 import {normalize} from "../../responsive/fontSize";
-import scan from "../../../assets/scan.png";
 import {GT} from "../../constants/fonts";
+import {useAuth} from "../../provider/AuthProvider";
 
 
 const PaymentModal = ({isOpen,setIsOpen,url,setCanGoBack}) => {
   const webView=useRef()
+  const{i18n}=useAuth()
   return (
     <Modal
       animationType="slide"
@@ -40,7 +40,7 @@ const PaymentModal = ({isOpen,setIsOpen,url,setCanGoBack}) => {
 
             <Text style={{color: "white",
               fontSize: normalize(24),
-              fontFamily: GT}}>Back</Text>
+              fontFamily: GT}}>{i18n.t('back')}</Text>
 
         </TouchableOpacity>
       </View>

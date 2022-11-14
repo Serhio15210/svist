@@ -1,20 +1,19 @@
 import React from "react";
-import {Image, Modal, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
-import freeRide from "../../../assets/freeRide.png";
+import {Modal, Text, TouchableOpacity, View} from "react-native";
 import {useNavigation} from "@react-navigation/native";
 import {normalize} from "../../responsive/fontSize";
 import {styles} from "./styles";
 import FreeRide from "../../../assets/freeRide.svg";
-import ModalHeader from "../../../assets/modalHeader.svg";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import ModalButton from "../../../assets/modalButton.svg";
 import {useSvistContext} from "../../provider/SvistProvider";
 import {useAuth} from "../../provider/AuthProvider";
+import CloseIcon from "../../../assets/closeIcon.svg";
+import CloseButton from "../CloseButton";
+
 const FreeRideModal = ({setIsOpen, isOpen}) => {
   const navigation = useNavigation()
   const {claimFreeRide, setClaimFreeRide}=useSvistContext()
-  const {costSettings,user}=useAuth()
+  const {costSettings,user,i18n}=useAuth()
   return (
     <Modal
       animationType="slide"
@@ -24,17 +23,15 @@ const FreeRideModal = ({setIsOpen, isOpen}) => {
         setIsOpen(!isOpen);
       }}>
       <View style={styles.container}>
-        <AntDesign name={'closesquareo'}
-                   style={{position: 'absolute', top: 30, right: 20, fontSize: 24, color: 'white'}}
-                   onPress={() => setIsOpen(false)}/>
+        <CloseButton onPress={() => setIsOpen(false)}/>
         <View style={{width: '100%'}}>
         <View style={{backgroundColor:'#FF9837',padding:normalize(24),paddingBottom:0,borderTopRightRadius:25,borderTopLeftRadius:25,paddingTop:normalize(7)}}>
           <FreeRide/>
         </View>
           <View style={styles.modalBlock}>
 
-            <Text style={styles.title}>Free ride on us!</Text>
-            <Text style={styles.text}>Claim your {costSettings?.free_minutes_first_ride} free minutes</Text>
+            <Text style={styles.title}>{i18n.t('freeRide')}</Text>
+            <Text style={styles.text}>{costSettings?.free_minutes_first_ride} {i18n.t('freeMinutes')}</Text>
             <TouchableOpacity
               style={styles.button}
               onPress={() => {
@@ -42,7 +39,7 @@ const FreeRideModal = ({setIsOpen, isOpen}) => {
                 setIsOpen(false)
               }}>
               <ModalButton width={normalize(326)} height={normalize(56)}/>
-              <Text style={styles.buttonText}>Claim</Text>
+              <Text style={styles.buttonText}>{i18n.t('claim')}</Text>
             </TouchableOpacity>
           </View>
         </View>

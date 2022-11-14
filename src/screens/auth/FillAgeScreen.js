@@ -10,12 +10,12 @@ import {createCard, profileUpdate} from "../../api/authApi";
 import AuthBackButton from "../../../assets/authBackButton.svg";
 import LoadingModal from "../../components/LoadingModal";
 import WheelPicker from "../../components/WheelPicker/WheelPicker";
-import {GT} from "../../constants/fonts";
+import {GT, GT_BOLD} from "../../constants/fonts";
+import expoRandom from "expo-random/src/ExpoRandom";
 
 const FillAgeScreen = () => {
-    const {name, setName, setSurname, surname, setEmail, email, authToken, setIsAuth} = useAuth()
+    const {name, setName, setSurname, surname, setEmail, email, authToken, setIsAuth,i18n} = useAuth()
     const [errorAge, setErrorAge] = useState(false)
-
     const days = []
     const days31 = []
     const days28 = []
@@ -30,80 +30,107 @@ const FillAgeScreen = () => {
       name: 'oct',
       num: 10
     }, {name: 'nov', num: 11}, {name: 'dec', num: 12}]
-    const [selectDay, setSelectDay] = useState(3)
-    const [selectMonth, setSelectMonth] = useState(5)
-    const [selectYear, setSelectYear] = useState(1994)
+  const navigation = useNavigation()
+  let max = new Date().getFullYear()
+  let min = 1900
+  for (let i = max; i >= min; i--) {
+    years.push(i)
+  }
+  for (let i = 1; i <= 30; i++) {
+    days.push(i)
+  }
+  for (let i = 1; i <= 31; i++) {
+    days31.push(i)
+  }
+  for (let i = 1; i <= 28; i++) {
+    days28.push(i)
+  }
+    const [selectDay, setSelectDay] = useState(4)
+    const [selectMonth, setSelectMonth] = useState(3)
+    const [selectYear, setSelectYear] = useState(years[102])
     const [openLink, setOpenLink] = useState(false)
     const [selectIndex, setSelectIndex] = useState(2)
+  useEffect(()=>{
 
+    setSelectYear(years[102])
+  },[])
+  const [errorText, setErrorText] = useState('')
     const checkAge = () => {
+
       return new Date(selectYear + 18, selectMonth - 1, selectDay) <= new Date()
     }
 
-    const navigation = useNavigation()
-    let max = new Date().getFullYear()
-    let min = max - 30
-    for (let i = max; i >= min; i--) {
-      years.push(i)
-    }
-    for (let i = 1; i <= 30; i++) {
-      days.push(i)
-    }
-    for (let i = 1; i <= 31; i++) {
-      days31.push(i)
-    }
-    for (let i = 1; i <= 28; i++) {
-      days28.push(i)
-    }
     const sendInfo = () => {
-      const age = `${selectYear}-${selectMonth < 10 ? `0${selectMonth}` : selectMonth}-${selectDay < 10 ? `0${selectDay}` : selectDay}`
+      const age = `${selectYear}-${selectMonth < 10 ? `0${selectMonth}` : selectMonth}-${selectDay < 10 ? `0${selectDay||1}` : selectDay||1}`
+
       profileUpdate(name, surname, email, age, authToken).then(res => {
-        res.data.data.success ? navigation.navigate('AddPaymentScreen') : setErrorAge(true)
+        if (res?.data?.data?.success) {
+          setErrorText('')
+          setErrorAge(false)
+          navigation.navigate('AddPaymentScreen')
+
+        } else {
+          setErrorAge(true)
+          setErrorText(res)
+        }
+
       })
     }
     const [selectData, setSelectData] = useState(days31)
     useEffect(() => {
+      console.log('index',selectIndex)
       if (selectMonth === 1 || selectMonth === 3 || selectMonth === 5 || selectMonth === 7 || selectMonth === 8 || selectMonth === 10 || selectMonth === 12) {
+        selectIndex===30||selectIndex===29||selectIndex===28&&setSelectDay(selectIndex+1)
 
         setSelectData(days31)
       } else if (selectMonth === 2) {
         if (selectIndex===30){
+          console.log(30)
+          setSelectDay(selectIndex-2)
           setSelectData(['','',''].concat(days28))
         }else if (selectIndex===29){
+          console.log(29)
+          setSelectDay(selectIndex-1)
           setSelectData(['',''].concat(days28))
-        } else setSelectData(days28)
+        } else {
+          console.log(28)
+          selectDay!==''|| selectDay!==0?setSelectData([].concat(days28)):setSelectData([''].concat(days28))
+          setSelectDay(selectIndex+1)
+
+        }
 
       } else{
         if (selectIndex===30){
+          setSelectDay(selectIndex)
           setSelectData([''].concat(days))
         }else setSelectData(days)
       }
     }, [selectMonth])
   useEffect(()=>{
-    if (selectDay===''){
+    console.log('day',selectDay)
+    if (selectDay===''||selectDay===0){
       setSelectData(selectData.filter(item=>item>0))
     }
   },[selectDay])
     return (
-      <View style={{...styles.container, backgroundColor: errorAge ? '#EF4E4E' : '#FE7B01'}}>
+      <View style={{...styles.container, backgroundColor: errorAge? '#EF4E4E' : '#FE7B01'}}>
         {openLink && <LoadingModal setOpenLoading={setOpenLink}/>}
         <TouchableOpacity style={{position: 'absolute', left: 0, top: normalize(48)}} onPress={() => navigation.goBack()}>
           <AuthBackButton/>
         </TouchableOpacity>
         <View style={{width: '100%'}}>
-          <Text style={styles.title}>Fill in age</Text>
-          <Text style={styles.text}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas risus
-            pellentesque.</Text>
+          <Text style={styles.title}>{i18n.t('ageSure')}</Text>
+          <Text style={styles.text}>{i18n.t('able18')}</Text>
           <View style={styles.wheelContainer}>
 
-            <WheelPicker dataSource={selectData.concat(selectData.filter(item=>item>0))} selectMonth={selectMonth} errorAge={errorAge}
+            <WheelPicker dataSource={selectData} selectMonth={selectMonth} errorAge={errorAge}
                          setSelectDay={setSelectDay} selectDay={selectDay} selectIndex={selectIndex}
                          setSelectIndex={setSelectIndex}/>
             <View style={{alignItems: 'center', justifyContent: 'center'}}>
               <DateBlock style={{position: 'absolute'}}/>
               <View style={{height: normalize(240), width: normalize(103), backgroundColor: 'transparent'}}>
                 <ScrollPicker
-                  dataSource={months.concat(months)}
+                  dataSource={months}
                   selectedIndex={2}
                   renderItem={(data, index, isSelected) => {
                     return (
@@ -111,7 +138,7 @@ const FillAgeScreen = () => {
                         fontWeight: isSelected ? '700' : '300',
                         fontSize: normalize(16),
                         color: isSelected ? errorAge ? '#EF4E4E' : '#FE7B01' : errorAge ? '#FD9F9F' : '#F9B26F'
-                      }}>{data.name}</Text>
+                      }}>{i18n.t(`${data.name}`)}</Text>
                     )
                   }}
                   onValueChange={(data, selectedIndex) => {
@@ -132,8 +159,8 @@ const FillAgeScreen = () => {
               <DateBlock style={{position: 'absolute'}}/>
               <View style={{height: normalize(240), width: normalize(103), backgroundColor: 'transparent'}}>
                 <ScrollPicker
-                  dataSource={years.reverse().concat(years)}
-                  selectedIndex={2}
+                  dataSource={years.reverse()}
+                  selectedIndex={102}
                   renderItem={(data, index, isSelected) => {
                     return (
                       <Text style={{
@@ -159,20 +186,20 @@ const FillAgeScreen = () => {
             </View>
           </View>
           {errorAge &&
-            <Text style={styles.errorText} numberOfLines={2} adjustsFontSizeToFit={true}>You can use scooters only when
-              you are 18+ years old</Text>}
+            <Text style={styles.errorText} numberOfLines={2} adjustsFontSizeToFit={true}>{errorText}</Text>}
         </View>
 
         <TouchableOpacity style={styles.centerBlock} onPress={() => {
-          if (checkAge()) {
-            setErrorAge(false)
-            sendInfo()
-          } else {
-            setErrorAge(true)
-          }
+          sendInfo()
+          // if (checkAge()) {
+          //   setErrorAge(false)
+          //   sendInfo()
+          // } else {
+          //   setErrorAge(true)
+          // }
         }}>
           <AuthWhiteButton/>
-          <Text style={{...styles.buttonText, color: errorAge ? '#EF4E4E' : '#FE7B01'}}>Continue</Text>
+          <Text style={{...styles.buttonText, color: errorAge ? '#EF4E4E' : '#FE7B01'}}>{i18n.t('continue')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -214,7 +241,7 @@ const styles = StyleSheet.create({
     fontFamily: GT
   },
   text: {
-    fontSize: normalize(16), color: 'white', alignSelf: 'center', marginTop: normalize(16)
+    fontSize: normalize(16), color: 'white'   , marginTop: normalize(16),fontFamily: GT
   },
   input: {
     position: 'absolute',

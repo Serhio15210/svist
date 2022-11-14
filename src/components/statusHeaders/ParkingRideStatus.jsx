@@ -5,15 +5,16 @@ import ParkingZoneIcon from "../../../assets/parkingZoneIcon.svg"
 import {useAuth} from "../../provider/AuthProvider";
 import {normalize} from "../../responsive/fontSize";
 import LowBattery from "../../../assets/lowBattery.svg";
+
 const ParkingRideStatus = ({batteryLevel}) => {
-  const {costSettings}=useAuth()
+  const {costSettings,i18n}=useAuth()
     return (
         <View style={{backgroundColor:'#3772FF',...styles.header}}>
             <View style={styles.block}>
                 {/*<MaterialCommunityIcons name={'map-marker-check'} style={{fontSize: normalize(24),color:'white'}}/>*/}
              <ParkingZoneIcon/>
 
-              <Text style={styles.text}>Parking zone</Text>
+              <Text style={styles.text}>{i18n.t('parkingZone')}</Text>
             </View>
           {parseInt(batteryLevel)<=costSettings?.lowPower&&<View style={styles.triangleCorner} />}
           {parseInt(batteryLevel)<=costSettings?.lowPower&&<View style={{backgroundColor:'#EF4E4E',alignItems:'center',justifyContent:'center',position:'absolute',right:0,borderTopRightRadius:25,padding:normalize(16),paddingBottom:normalize(40)}}>

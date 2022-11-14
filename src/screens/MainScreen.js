@@ -1,8 +1,9 @@
 import React, {useEffect, useRef, useState} from "react";
-import {Image, LogBox, StyleSheet, Text, View} from "react-native";
-import {TouchableOpacity} from "react-native-gesture-handler";
-import MapView, {Circle, Marker, Polygon, PROVIDER_GOOGLE} from "react-native-maps";
-import {useNavigation} from "@react-navigation/native";
+import {AppState, Image, Linking, LogBox, Platform, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+// import {TouchableOpacity} from "react-native-gesture-handler";
+import MapView, {Circle, Marker, PROVIDER_GOOGLE} from "react-native-maps";
+// import MapView from "react-native-map-clustering";
+import {useIsFocused, useNavigation} from '@react-navigation/native';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import scan from "../../assets/scan.png";
@@ -18,244 +19,305 @@ import MainButton from "../../assets/mainButton.svg";
 import InfoModalButton from "../../assets/infoModalButton.svg";
 import DrawerMenuButton from "../components/DrawerMenuButton";
 import {useSvistContext} from "../provider/SvistProvider";
-import {getCloseScooter, getCurrentTrip, getPolygons, getScooters, isRange, stopTrip} from "../api/scooterApi";
+import {createTrip, getCurrentTrip, getPolygons, getScooters, isRange, startTrip, stopTrip} from "../api/scooterApi";
 import {useAuth} from "../provider/AuthProvider";
 import ReserveModal from "../components/ReserveModal";
 import SocketIOClient from "socket.io-client";
 import OutZoomMarker from "../components/OutZoomMarker";
 import ScooterMarker from "../components/ScooterMarker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import LoadingModal from "../components/LoadingModal";
-import {getCards, getCostSettings} from "../api/authApi";
+import {getCards, getCostSettings, getProfileInfo} from "../api/authApi";
 import * as Location from 'expo-location';
-import * as TaskManager from "expo-task-manager"
 import {GT} from "../constants/fonts";
 import ignoreWarnings from "ignore-warnings";
-import * as RNFS from "expo-file-system";
-// SplashScreen.preventAutoHideAsync();
-const FONT = 'GTEestiProText-BookItalic'
-const LOCATION_TASK_NAME = "LOCATION_TASK_NAME"
+import MapPolygon from "../components/MapPolygon";
+import AddCardModal from "../components/AddCardModal";
+import TimeoutModal from "../components/TimeoutModal";
+import ReservationCanceledModal from "../components/ReservationCanceledModal";
+import OutlineMarker from "../components/OutlineMarker";
+import {useKeepAwake} from 'expo-keep-awake';
+import hexToRgba from 'hex-to-rgba';
+
 let foregroundSubscription = null
 const MainScreen = () => {
+  useKeepAwake();
   let mapRef = useRef();
   const marker = useRef();
+  const isFocused = useIsFocused();
   const [coordinates, setCoordinates] = useState({latitude: 0, longitude: 0});
   const [coordinatesNearby, setCoordinatesNearby] = useState({latitude: 0, longitude: 0});
+  const [coordinatesReserve, setCoordinatesReserve] = useState({});
   const navigation = useNavigation();
   const [locationError, setLocationError] = useState(null);
   const [openLocationError, setOpenLocationError] = useState(false);
   const [openCityError, setOpenCityError] = useState(false);
   const [checkCityError, setCheckCityError] = useState(true);
   const [showInfo, setShowInfo] = useState(false);
-  const {isConnectedErrorOpen, setIsConnectedErrorOpen,reservation, setReservation} = useSvistContext()
+  const [reserved, setReserved] = useState(false);
+  const {isConnectedErrorOpen, setIsConnectedErrorOpen, reservation, setReservation} = useSvistContext()
   const [openFreeRide, setOpenFreeRide] = useState(false);
   const [confirmReservation, setConfirmReservation] = useState(false);
   const [error, setError] = useState(false)
   const [errorOpen, setErrorOpen] = useState(false)
   const [scooters, setScooters] = useState([]);
   const [polygons, setPolygons] = useState([]);
-  const [isAdded, setIsAdded] = useState(false)
-  const {authToken,costSettings,user,seconds, setSeconds} = useAuth()
-  const {selectScooter, setSelectScooter, claimFreeRide} = useSvistContext()
+
+  const {authToken, costSettings, user, seconds, setSeconds, setCostSettings, setUser, i18n,isAdded, setIsAdded} = useAuth()
+  const {selectScooter, setSelectScooter, claimFreeRide, isFirstRide, setIsFirstRide} = useSvistContext()
   // const [seconds, setSeconds] = useState(costSettings?.max_reserve_minutes*60);
+  const [addCard, setAddCard] = useState(false)
   const [timeout, setTimeout] = useState(false)
   const [cancel, setCancel] = useState(false)
-  const [zoomLevel, setZoomLevel] = useState({latitudeDelta: 0, longitudeDelta: 0})
+  const [cancelPress, setCancelPress] = useState(false)
+  const [zoomLevel, setZoomLevel] = useState(false)
   const [locationChange, setLocationChange] = useState(false)
   const [mapFocus, setMapFocus] = useState(false)
   const [scootersGet, setScootersGet] = useState(false)
+  const [reserveName, setReserveName] = useState('')
+  const [permissionChange, setPermissionChange] = useState(false)
   ignoreWarnings('warn', ['ViewPropTypes', '[react-native-gesture-handler]'])
-
+  const {locale} = useAuth()
   LogBox.ignoreLogs([
     'animateToCoordinate() is deprecated, use animateCamera() instead'
   ])
-  // useEffect(()=>{
-  //
-  //     getCostSettings(authToken).then(res => {
-  //       setSeconds(res.data?.max_reserve_minutes*60)
-  //     })
-  //
-  // },[])
-  const hexToRgbA = (hex) => {
-    let c;
-    if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
-      c = hex.substring(1).split('');
-      if (c.length === 3) {
-        c = [c[0], c[0], c[1], c[1], c[2], c[2]];
-      }
-      c = '0x' + c.join('');
-      return 'rgba(' + [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(',') + ',0.24)';
-    }
-    throw new Error('Bad Hex');
-  }
+  const socket = SocketIOClient(`https://scooter3.tcl.quazom.com:36502?token=${authToken}`, {
+    transports: ['websocket']
+  });
 
   const getLocation = async () => {
-    const {granted} = await Location.getForegroundPermissionsAsync()
-    if (!granted) {
-      console.log("location tracking denied")
-      return
+    // setLocationChange(true)
+    const {granted, canAskAgain} = await Location.getForegroundPermissionsAsync()
+
+    if (!granted && !canAskAgain) {
+      Linking.openSettings();
+      setPermissionChange(!permissionChange)
     }
-    // Make sure that foreground location tracking is not running
-    foregroundSubscription?.remove()
-    // Start watching position in real-time
-    let location = await Location.getCurrentPositionAsync({});
+    Location.getCurrentPositionAsync({}).then(async location => {
 
-    setCoordinates(location.coords);
-    mapRef?.current?.animateToCoordinate({
-      latitude: location.coords.latitude,
-      longitude: location.coords.longitude,
-    }, 1000)
-    foregroundSubscription = await Location.watchPositionAsync(
-      {
-        // For better logs, we set the accuracy to the most sensitive option
-        accuracy: Location.Accuracy.BestForNavigation,
-      },
-      location => {
-
-        setCoordinates({latitude: location.coords.latitude, longitude: location.coords.longitude})
+      setCoordinates(location.coords);
+      if (Platform.OS === 'android') {
+        mapRef?.current?.animateToCoordinate({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }, 400)
+      } else {
+        mapRef?.current?.animateToRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }, 400)
       }
-    )
+
+      foregroundSubscription?.remove()
+
+      foregroundSubscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.BestForNavigation,
+        },
+        location => {
+          setCoordinates({latitude: location.coords.latitude, longitude: location.coords.longitude})
+        }
+      )
+      setLocationChange(true)
+    }).catch(() => {
+      setLocationChange(true)
+    })
+
   }
 
+  const reserveScooter = () => {
+    createTrip(authToken, selectScooter?.scooter_name || selectScooter?.name_scooter).then(res => {
+      if (res.result === 'success') {
+        console.log('confirm create reserve trip')
+        setSelectScooter({...selectScooter, tripId: res?.tripId})
+        startTrip(authToken, res?.tripId, 1).then(res => {
+          if (res.result === 'success') {
+            console.log('---confirm reserve trip started---')
+            setReservation(true)
+            setError('')
+          } else {
+            setError(res?.message)
+            setErrorOpen(true)
+          }
+        })
+
+      } else {
+        setError(res?.message || res)
+        // console.log(res?.message || res)
+        setErrorOpen(true)
+        // setSelectScooter({})
+      }
+    })
+
+
+  }
   const stopReservation = () => {
     stopTrip(authToken, selectScooter?.tripId || selectScooter?.id, selectScooter.latitude + '', selectScooter.longitude + '').then(res => {
       console.log(res)
-      console.log('stop')
-      if (res.result === 'success') {
-        AsyncStorage.removeItem('reservation')
+      if (res.result === 'success' || res === 'Поездка не найдена'||res ==='Jazda sa nenašla'||res ==='Подорож не було знайдено'||res ==='The trip was not found') {
         if (seconds > 0) {
-          setSeconds(costSettings?.max_reserve_minutes*60)
+          // console.log('cancel',seconds,cancel)
           setCancel(true)
+          setTimeout(false)
+          setSelectScooter({})
+          setReserveName('')
         } else {
-          setSeconds(costSettings?.max_reserve_minutes*60)
-          setTimeout(true)
+          // console.log('time',seconds,!cancel)
+          !cancel && setTimeout(true)
+          setCancel(false)
         }
+        setSeconds(costSettings?.max_reserve_minutes * 60)
+
+        // setReservation(false)
       }
-      // else {
-      //   console.log(res)
-      //   setError('Ошибка остановки резервирования')
-      //   setErrorOpen(true)
-      // }
     })
   }
   const checkReservation = () => {
     getCurrentTrip(authToken).then(res => {
-      if (res?.status === 'in_process'  ) {
+      if (res?.status === 'in_process') {
         setSelectScooter(res)
-        if (res?.is_reserve&& parseInt(res?.duration) > 0) {
-          AsyncStorage.getItem('reservation').then(time => {
-            if (time) {
-              console.log('time',time)
-              setSeconds(parseInt(time))
-              setReservation(true)
-            } else setSeconds(costSettings?.max_reserve_minutes*60)
-          })
-        } else {
-          if(parseInt(res?.duration) > 0){
+        // setCoordinatesReserve({})
+        if (res?.is_reserve && parseInt(res?.duration) > 0) {
+          costSettings?.max_reserve_minutes && setSeconds(parseInt(costSettings?.max_reserve_minutes * 60) - parseInt(res?.duration))
+          setReservation(true)
+        } else if (res?.is_been_started) {
+          if (parseInt(res?.duration) > 0) {
             navigation.reset({
               index: 0,
               routes: [{name: 'RideScreen'}],
             })
-          }else navigation.navigate('RideScreen')
-
+          } else navigation.navigate('RideScreen')
+        } else if (res?.is_been_reserved && parseInt(res?.duration) > 0) {
+          stopReservation()
+          setReservation(false)
         }
+      }
+      else if (reservation){
+        setCancel(false)
+        setTimeout(true)
+        setSelectScooter({})
+        // setReservation(false)
+        setSeconds(costSettings?.max_reserve_minutes * 60)
+
       }
     })
   }
+
   const checkLocation = async () => {
     const res = await Location.getForegroundPermissionsAsync()
     return res.granted
   }
-  const checkCityAccess =  () => {
-    isRange(authToken,coordinates).then((res)=>{
-      if (!res.data.is_range){
+
+  const checkCityAccess = () => {
+    isRange(authToken, coordinates).then((res) => {
+      if (!res.data.is_range) {
         setOpenCityError(true)
       }
-
     })
   }
   useEffect(() => {
+      Location.getForegroundPermissionsAsync().then(res => {
+        if (res.granted) {
+          getLocation()
+          setOpenLocationError(false)
+        } else {
+          setLocationChange(true)
+          setOpenLocationError(true)
+        }
+      })
+  }, [isFocused, mapFocus, permissionChange])
 
-    Location.getForegroundPermissionsAsync().then(res => {
-      if (res.granted) {
-        getLocation()
-        setOpenLocationError(false)
-      } else {
-        setOpenLocationError(true)
-      }
-    })
-  }, [])
-  useEffect(()=>{
-    if (coordinates.latitude>0&&checkCityError&&navigation.isFocused()){
+  useEffect(() => {
+    if (coordinates.latitude > 0 && checkCityError && isFocused) {
       checkCityAccess()
       setCheckCityError(false)
     }
-  },[coordinates,checkCityError,navigation.isFocused()])
+  }, [coordinates, checkCityError, isFocused])
   useEffect(() => {
-    // if (navigation.isFocused()) {
+    if (isFocused) {
       checkReservation()
+    }
+
+  }, [isFocused, AppState.currentState])
+  useEffect(() => {
+    if (locationChange) {
       getScooters(authToken).then(res => {
-        setScooters(res)
-        setScootersGet(true)
+        setScooters(res.filter(item => item.in_polygon))
+
       })
       getPolygons(authToken).then(res => {
         setPolygons(res)
       })
-      // getCloseScooter(coordinates, authToken).then(res => {
-      //   setCoordinatesNearby({latitude: res?.latitude, longitude: res?.longitude})
-      // })
-      return (() => {
-        setScooters([])
-        setPolygons([])
-        setIsAdded(false)
-        setCoordinates({latitude: 0, longitude: 0})
-        setCoordinatesNearby({latitude: 0, longitude: 0})
-      })
+    }
+    // getCloseScooter(coordinates, authToken).then(res => {
+    //   setCoordinatesNearby({latitude: res?.latitude, longitude: res?.longitude})
+    // })
+    // return (() => {
+    //   setScooters([])
+    //   setPolygons([])
+    //   // setIsAdded(false)
+    //   // setCoordinates({latitude: 0, longitude: 0})
+    //   // setCoordinatesNearby({latitude: 0, longitude: 0})
+    // })
+  }, [locationChange])
 
-  }, [])
   useEffect(() => {
-    if (navigation.isFocused()) {
+      getProfileInfo(authToken).then(info => {
 
+        setUser(info)
+        if (info?.number_of_trips > 0) {
+          setIsFirstRide(false)
+        } else setIsFirstRide(true)
+
+      })
+      getCostSettings(authToken).then(res => {
+
+        setCostSettings(res.data)
+      })
       getCards(authToken).then(res => {
+
         if (res?.data?.data?.length > 0) {
           setIsAdded(true)
         } else {
           setIsAdded(false)
         }
       })
-    }
-  }, [navigation.isFocused()])
+  }, [])
   useEffect(() => {
-    if (navigation.isFocused()) {
-      const socket = SocketIOClient(`https://scooter3.tcl.quazom.com:36502?token=${authToken}`, {
-        transports: ['websocket']
-      });
+    if (isFocused) {
       socket.on('connect', function () {
-        console.log('connect')
+        // console.log('connect')
         socket.emit('subscribe', 'updateScooterLocation');
+
         socket.on('updateScooterLocation', function (data) {
           // console.log('new', data.data)
+          if (data.data?.is_free||reserveName.length>0) {
 
-          if (data.data.is_free) {
-            let pastData = scooters.filter(item => item?.scooter_name === data.data?.scooter_name)[0]
+            // let pastData = scooters.filter(item => item?.scooter_name === data.data?.scooter_name)[0]
             // console.log('data', pastData)
-            if (pastData?.longitude) {
-
-              setScooters((prev) => prev.filter(item => item.scooter_name !== data.data.scooter_name).concat([{
-                ...pastData,
-                battery_power: data.data?.battery_level > 0 ? data.data?.battery_level : pastData?.battery_power,
-                latitude: data.data.latitude,
-                longitude: data.data.longitude
-              }]))
-            } else {
+            // if (data.data?.longitude) {
 
               setScooters((prev) => prev.filter(item => item.scooter_name !== data.data.scooter_name).concat([{
                 ...data.data,
-                battery_power: data.data?.battery_level
+                battery_power: data.data?.battery_level,
+                latitude: data.data.latitude,
+                longitude: data.data.longitude
               }]))
-            }
+
+            // } else {
+            //
+            //   setScooters((prev) => scooters.filter(item => item.scooter_name !== data.data.scooter_name).concat([{
+            //     ...data.data,
+            //     battery_power: data.data?.battery_level
+            //   }]))
+            // }
           } else {
-            setScooters((prev) => prev.filter(item => item.scooter_name !== data.data.scooter_name))
+            console.log(reserveName)
+            reserveName!==data.data.scooter_name&&setScooters((prev) => prev.filter(item => item.scooter_name !== data.data.scooter_name))
+            // reservation&&setScooters(prev=>prev.concat([{...data.data}]))
           }
         })
       });
@@ -263,105 +325,127 @@ const MainScreen = () => {
       //   socket.disconnect();
       // };
     }
-  }, [navigation.isFocused()])
+  }, [isFocused,reserveName])
+
 
   return (
     <View style={styles.container}>
+      {timeout && isFocused &&
+        <TimeoutModal setIsOpen={setTimeout} isOpen={timeout} setReservation={setReservation} setSeconds={setSeconds}
+                      costSettings={costSettings} reserveScooter={reserveScooter}/>}
+      {cancel && isFocused &&
+        <ReservationCanceledModal setIsOpen={setCancel} isOpen={cancel} setReservation={setReservation}/>}
       {openLocationError &&
         <LocationErrorModal isOpen={openLocationError} setIsOpen={setOpenLocationError} getLocation={getLocation}/>}
-      {openCityError && <BecomePartnerModal isOpen={openCityError} setIsOpen={setOpenCityError}/>}
-      {openFreeRide && !openLocationError  && <FreeRideModal isOpen={openFreeRide} setIsOpen={setOpenFreeRide}/>}
+      {openCityError && !reservation && <BecomePartnerModal isOpen={openCityError} setIsOpen={setOpenCityError}/>}
+      {openFreeRide && !openLocationError && <FreeRideModal isOpen={openFreeRide} setIsOpen={setOpenFreeRide}/>}
       {confirmReservation &&
         <ConfirmReservationModal isOpen={confirmReservation} setIsOpen={setConfirmReservation}
                                  setReservation={setReservation} scooter={selectScooter}/>}
       {isConnectedErrorOpen &&
         <ConnectionErrorModal isOpen={isConnectedErrorOpen} setIsOpen={setIsConnectedErrorOpen}/>}
-
       <DrawerMenuButton/>
-      {!claimFreeRide && !isConnectedErrorOpen&&user?.avaliable_free_trip && <TouchableOpacity style={styles.claimFreeRideButton} onPress={() => {
-        setOpenFreeRide(true)
-      }}>
-        <InfoModalButton width={normalize(282)} height={normalize(48)}/>
-        <Text style={styles.claimFreeRideText}>Claim your FREE ride here</Text>
-      </TouchableOpacity>}
-      {!mapFocus && !openLocationError &&seconds<=0&& <LoadingModal/>}
+      {!claimFreeRide && !isConnectedErrorOpen && user?.avaliable_free_trip &&
+        <TouchableOpacity style={styles.claimFreeRideButton} onPress={() => {
+          setOpenFreeRide(true)
+        }}>
+          <InfoModalButton width={normalize(282)} height={normalize(48)}/>
+          <Text style={styles.claimFreeRideText}>{i18n.t('claim')} {i18n.t('freeMinutes')}</Text>
+        </TouchableOpacity>}
+
+      {addCard && !isAdded && <AddCardModal setIsOpen={setAddCard} isOpen={addCard} setIsAdded={setIsAdded}/>}
+      { !costSettings?.max_reserve_minutes && <LoadingModal/>}
       <MapView
-        provider={PROVIDER_GOOGLE}
+        // provider={PROVIDER_GOOGLE}
         style={styles.map}
+        // clusteringEnabled={true}
+        // loadingEnabled={true}
+        showsScale={false}
+        showsBuildings={false}
+        minZoomLevel={6}  // default => 0
+        maxZoomLevel={15} // default => 20
         onPress={() => {
           if (!isConnectedErrorOpen && showInfo) {
             setShowInfo(false)
-            !reservation && setSelectScooter({})
-          }
+            setReserved(false)
+            if (!reservation){
+              setSelectScooter({})
+              setReserveName('')
+            }
 
+          }
         }}
         onMapReady={() => {
           setMapFocus(true)
-        }
-        }
+        }}
         initialRegion={{
-          latitude: 50.455378,
-          longitude: 30.519155,
-          latitudeDelta: 1,
-          longitudeDelta: 1,
+          latitude: coordinates?.latitude > 0 ? coordinates.latitude : 48.1577172 || parseFloat(selectScooter?.latitude),
+          longitude: coordinates.longitude > 0 ? coordinates.longitude : 17.1215901 || parseFloat(selectScooter?.longitude),
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+        onRegionChange={(region) => {
+          !reservation && region.longitudeDelta <= 0.035896338522420024 && region.latitudeDelta <= 0.057341003097498344 ?
+            setZoomLevel(true) : setZoomLevel(false)
         }}
 
-        onRegionChange={(region) => {
-          // console.log(region)
-          !reservation && setZoomLevel({latitudeDelta: region.latitudeDelta, longitudeDelta: region.longitudeDelta})
-        }}
         ref={mapRef}
       >
         {locationError !== 2 &&
           <Circle center={{latitude: coordinates.latitude, longitude: coordinates.longitude}} radius={150}
-                  fillColor={"rgba(254, 123, 1, 0.16)"} strokeWidth={0}/>}
+                  fillColor={ hexToRgba('#FE7B01',0.24)} strokeWidth={0}/>}
         {locationError !== 2 ? <Marker coordinate={{
           latitude: coordinates.latitude || 0,
           longitude: coordinates.longitude || 0,
         }} anchor={{x: 0.5, y: 0.5}}>
           <UserMarker/>
         </Marker> : <></>}
-        {scooters?.map((item) => {
+
+        {scooters?.map((item, index) => {
           return (
             <Marker coordinate={{
               latitude: parseFloat(item?.latitude) || 0,
               longitude: parseFloat(item?.longitude) || 0,
-            }} key={item?.scooter_id} onCalloutPress={() => {
-
+            }}  stopPropagation key={index} tracksViewChanges={false} tracksInfoWindowChanges={false}
+            //         onCalloutPress={(e) => {
+            //           e.stopPropagation()
+            //           setReserved(true)
+            //           if (!reservation && !isConnectedErrorOpen) {
+            //             setSelectScooter(item)
+            //             setShowInfo(true)
+            //           }
+            //         }} onSelect={(e) => {
+            //           e.stopPropagation()
+            //   setReserved(true)
+            //   if (!reservation && !isConnectedErrorOpen) {
+            //     setSelectScooter(item)
+            //     setShowInfo(true)
+            //   }
+            // }}
+                    onPress={(e) => {
+              e.stopPropagation()
+              // console.log(selectScooter?.scooter_id === item?.scooter_id)
               if (!reservation && !isConnectedErrorOpen) {
-
                 setSelectScooter(item)
-                setShowInfo(true)
-              }
-            }} onSelect={() => {
-
-              if (!reservation && !isConnectedErrorOpen) {
-                setSelectScooter(item)
-                setShowInfo(true)
-              }
-            }} onPress={() => {
-
-              if (!reservation && !isConnectedErrorOpen) {
-
-                setSelectScooter(item)
+                // setReserveName(item?.scooter_name)
                 setShowInfo(true)
               }
             }} style={{alignItems: "center", justifyContent: "center", width: 80}}>
-              {zoomLevel.longitudeDelta <= 0.035896338522420024 && zoomLevel.latitudeDelta <= 0.057341003097498344 ?
-                <ScooterMarker item={item} selectMarker={selectScooter}/> :
-                selectScooter?.scooter_id === item?.scooter_id ?
+              {zoomLevel ?
+                selectScooter?.scooter_name === item?.scooter_name||selectScooter?.name_scooter===item?.scooter_name ?
+                  <ScooterMarker item={item} selectMarker={selectScooter}/> :
+                  <OutlineMarker item={item} selectMarker={selectScooter}/> :
+                selectScooter?.scooter_name === item?.scooter_name||selectScooter?.name_scooter===item?.scooter_name ?
                   <ScooterMarker item={item} selectMarker={selectScooter}/> : <OutZoomMarker/>
               }
+
 
             </Marker>
           );
         })}
 
-        {/*{polygons?.length > 0 && polygons?.map(item =>*/}
-        {/*  <Polygon key={item?.id} coordinates={item?.polygon}*/}
-        {/*           fillColor={hexToRgbA(item?.color)}*/}
-        {/*           strokeColor={item?.color}*/}
-        {/*           strokeWidth={2}/>)}*/}
+        {polygons?.length > 0 && polygons?.map(item =>
+          <MapPolygon item={item} key={item?.id}/>)}
       </MapView>
       <View style={styles.scanRowContainer}>
         <View style={{...styles.rowContainer, justifyContent: "space-between"}}>
@@ -370,50 +454,72 @@ const MainScreen = () => {
           </TouchableOpacity>
           <TouchableOpacity style={{alignItems: 'center', justifyContent: 'center'}}
                             onPress={() => {
-                              !isConnectedErrorOpen && navigation.navigate('ScannerScreen')
+                              if (isAdded) {
+                                !isConnectedErrorOpen && navigation.navigate('ScannerScreen')
+                              } else {
+                                setAddCard(true)
+                              }
+
                             }}>
             <MainButton width={normalize(230)} height={normalize(56)} fill={'red'}/>
-            <View style={styles.scanButton}>
+            <View style={{...styles.scanButton, paddingRight: locale === 'eng' ? normalize(70) : normalize(40)}}>
               <Image source={scan} style={{width: 24, height: 24}}/>
-              <Text style={styles.buttonText}>Scan</Text>
+              <Text style={styles.buttonText}>{i18n.t('scan')}</Text>
             </View>
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.screenButton}
                             onPress={() => {
                               checkLocation().then(res => {
                                 if (res) {
-                                  console.log('here press')
+                                  setPermissionChange(!permissionChange)
+                                  // console.log('here press')
+
                                   setOpenLocationError(false)
                                   if (coordinates?.latitude !== 0) {
-                                    mapRef?.current?.animateToCoordinate({
-                                      latitude: coordinates.latitude,
-                                      longitude: coordinates.longitude,
-                                    }, 1000)
+                                    if (Platform.OS==='android'){
+                                      mapRef?.current?.animateToCoordinate({
+                                        latitude: coordinates.latitude,
+                                        longitude: coordinates.longitude,
+                                        latitudeDelta: 0.05,
+                                        longitudeDelta: 0.05,
+                                      }, 1000)
+                                    }else {
+                                      mapRef?.current.animateCamera({
+                                          center: {
+                                            latitude: coordinates.latitude,
+                                            longitude: coordinates.longitude,
+                                            latitudeDelta: 0.05,
+                                            longitudeDelta: 0.05,
+                                          }},
+                                        {duration: 1000}
+                                      );
+                                    }
                                   }
+                                  // getLocation()
                                 } else {
                                   setOpenLocationError(true)
                                 }
                               })
                             }}>
-            {/*<MaterialIcons name={"gps-fixed"} style={{fontSize: 24}}/>*/}
+
             <MaterialIcons name="gps-fixed" size={24} color="black"/>
           </TouchableOpacity>
         </View>
         {showInfo &&
           <ReserveModal confirmReservation={confirmReservation} setConfirmReservation={setConfirmReservation}
-                        setShowInfo={setShowInfo} scooter={selectScooter} isAdded={isAdded} setIsAdded={setIsAdded}/>}
+                        setShowInfo={setShowInfo} scooter={selectScooter} isAdded={isAdded} setIsAdded={setIsAdded}
+                        setAddCard={setAddCard} addCard={addCard} reserveName={reserveName} setReserveName={setReserveName}/>}
         {reservation && <ReservationBlock setReservation={setReservation} seconds={seconds} setSeconds={setSeconds}
                                           selectScooter={selectScooter} setErrorOpen={setErrorOpen}
                                           errorOpen={errorOpen} stopReservation={stopReservation} cancel={cancel}
                                           setCancel={setCancel} setTimeout={setTimeout} timeout={timeout}
-                                          reservation={reservation}/>}
+                                          reservation={reservation} reserveScooter={reserveScooter}
+                                          cancelPress={cancelPress} setCancelPress={setCancelPress}/>}
       </View>
     </View>
 
   );
 };
-
 
 const styles = StyleSheet.create({
 
@@ -427,7 +533,7 @@ const styles = StyleSheet.create({
     position: "absolute", bottom: normalize(32), zIndex: 1000, width: "95%"
   },
   map: {
-    ...StyleSheet.absoluteFillObject, zIndex: -1
+    ...StyleSheet.absoluteFillObject, zIndex: -1,
   },
   screenButton: {
     backgroundColor: "white",

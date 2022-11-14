@@ -7,10 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "scheme": "com.svist",
-
+    "plugins": ["expo-notifications"],
     "splash": {
       "image": "./assets/splash.png",
-
       "backgroundColor": "#FE7B01"
     },
     "updates": {
@@ -21,13 +20,11 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.svist",
+      "bundleIdentifier": "com.scooters.ios",
       "buildNumber": "5",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "config": {
-        "googleMapsApiKey": "AIzaSyAksIHv0l4hJaI-Fisf1APhfruEqfntwPk",
-        "googleSignIn": {
-          "reservedClientId": "com.googleusercontent.apps.77036362618-h84gth2hu6ac8coujuagr0b3u5bvmbkh"
-        }
+        "googleMapsApiKey": "AIzaSyAksIHv0l4hJaI-Fisf1APhfruEqfntwPk"
       }
     },
     "android": {
@@ -39,9 +36,13 @@
       "package": "com.svist",
       "googleServicesFile": "./google-services.json"
     },
-
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "93ecb302-f0c8-4f79-95fb-b1fef2b58e44"
+      }
     }
   }
 }

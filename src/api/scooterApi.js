@@ -1,11 +1,16 @@
 import axios from "axios";
 import {BASE_URL} from "./apiKeys";
 import * as RNFS from "expo-file-system";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const getScooters = (token) => {
+  const locale = AsyncStorage.getItem('locale').then(res=> {
+    return res
+  })
   return axios.get(`${BASE_URL}/api/v1/dashboard/get-scooters`, {
     headers: {
-      'Authorization': token
+      'Authorization': token,
+      'language':locale
     },
   }).then((response) => {
 
@@ -14,10 +19,12 @@ export const getScooters = (token) => {
     console.log(error)
   });
 }
-export const getPolygons = (token) => {
+export const getPolygons = async (token) => {
+  const locale = await AsyncStorage.getItem('locale')
   return axios.get(`${BASE_URL}/api/v1/polygons`, {
     headers: {
-      'access-token': token
+      'access-token': token,
+      'language':locale
     },
   }).then((response) => {
 
@@ -26,11 +33,12 @@ export const getPolygons = (token) => {
     console.log(error)
   });
 }
-export const getCurrentTrip = (token) => {
-
+export const getCurrentTrip = async (token) => {
+  const locale = await AsyncStorage.getItem('locale')
   return axios.get(`${BASE_URL}/api/v1/get-current-trip`, {
     headers: {
-      'Authorization': token
+      'Authorization': token,
+      'language': locale
     },
   }).then((response) => {
 
@@ -39,13 +47,14 @@ export const getCurrentTrip = (token) => {
     return error.response.data.errors[0].message
   });
 }
-export const createTrip = (token, name) => {
-
+export const createTrip = async (token, name) => {
+  const locale = await AsyncStorage.getItem('locale')
   return axios.post(`${BASE_URL}/api/v1/create-trip`, {
     name: name
   }, {
     headers: {
-      'access-token': token
+      'access-token': token,
+      'language': locale
     },
   }).then((response) => {
 
@@ -54,15 +63,17 @@ export const createTrip = (token, name) => {
     return error.response.data.errors[0].message
   });
 }
-export const startTrip = (token, id,isReserve) => {
+export const startTrip = async (token, id, isReserve) => {
+  const locale = await AsyncStorage.getItem('locale')
   const formData = new FormData();
   formData.append('tripId', id)
-  formData.append('isReserve', isReserve||0)
+  formData.append('isReserve', isReserve || 0)
 
   return axios.post(`${BASE_URL}/api/v1/start-trip`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
-      'access-token': token
+      'access-token': token,
+      'language': locale
     },
   }).then((response) => {
 
@@ -71,15 +82,16 @@ export const startTrip = (token, id,isReserve) => {
     return error.response.data.errors[0].message
   });
 }
-export const startReservedTrip = (token, id) => {
-
+export const startReservedTrip = async (token, id) => {
+  const locale = await AsyncStorage.getItem('locale')
   const formData = new FormData();
   formData.append('tripId', id)
 
   return axios.post(`${BASE_URL}/api/v1/start-reserved-trip`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
-      'access-token': token
+      'access-token': token,
+      'language': locale
     },
   }).then((response) => {
 
@@ -88,14 +100,15 @@ export const startReservedTrip = (token, id) => {
     return error.response.data.errors[0].message
   });
 }
-export const pauseTrip = (token, id) => {
-
+export const pauseTrip = async (token, id) => {
+  const locale = await AsyncStorage.getItem('locale')
   const formData = new FormData();
   formData.append('tripId', id)
   return axios.post(`${BASE_URL}/api/v1/pause-trip`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
-      'access-token': token
+      'access-token': token,
+      'language': locale
     },
   }).then((response) => {
     console.log('---pause trip---')
@@ -104,14 +117,15 @@ export const pauseTrip = (token, id) => {
     return error
   });
 }
-export const continueTrip = (token, id) => {
-
+export const continueTrip = async (token, id) => {
+  const locale = await AsyncStorage.getItem('locale')
   const formData = new FormData();
   formData.append('tripId', id)
   return axios.post(`${BASE_URL}/api/v1/continue-trip`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
-      'access-token': token
+      'access-token': token,
+      'language': locale
     },
   }).then((response) => {
     console.log('---continue trip---')
@@ -120,9 +134,9 @@ export const continueTrip = (token, id) => {
     return error
   });
 }
-export const stopTrip = (token, id, latitude, longitude) => {
+export const stopTrip = async (token, id, latitude, longitude) => {
 
-
+  const locale = await AsyncStorage.getItem('locale')
   return axios.post(`${BASE_URL}/api/v1/stop-trip`, {
     "tripId": id,
     "latitude": latitude,
@@ -130,7 +144,8 @@ export const stopTrip = (token, id, latitude, longitude) => {
     "request_id": "test"
   }, {
     headers: {
-      'Authorization': token
+      'Authorization': token,
+      'language': locale
     },
   }).then((response) => {
     console.log('---stop trip---')
@@ -139,8 +154,8 @@ export const stopTrip = (token, id, latitude, longitude) => {
     return error.response.data.errors[0].message
   });
 }
-export const setRatingTrip = (token, id,rating,image) => {
-
+export const setRatingTrip = async (token, id, rating, image) => {
+  const locale = await AsyncStorage.getItem('locale')
   // const imageData = image.base64
   // const imagePath = `${RNFS.cacheDirectory}${imageData.split('/')[2]}.jpg`;
   // console.log(token,id,rating,imagePath)
@@ -148,7 +163,7 @@ export const setRatingTrip = (token, id,rating,image) => {
   //   encoding: RNFS.EncodingType.Base64,
   // })
   //   .then(() => console.log('Image converted to jpg and saved at ' + imagePath));
-  let name =image?.uri.split('/').pop()
+  let name = image?.uri?.split('/')?.pop()
   let match = /\.(\w+)$/.exec(name);
   let type = match ? `image/${match[1]}` : `image`;
   const formData = new FormData();
@@ -162,7 +177,8 @@ export const setRatingTrip = (token, id,rating,image) => {
   return axios.post(`${BASE_URL}/api/v1/set-rating-trip`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
-      'access-token': token
+      'access-token': token,
+      'language': locale
     },
   }).then((response) => {
 
@@ -189,10 +205,12 @@ export const getCloseScooter=(coords,token)=>{
     console.log(error)
   });
 }
-export const getDebts=(token)=>{
+export const getDebts=async (token) => {
+  const locale = await AsyncStorage.getItem('locale')
   return axios.get(`${BASE_URL}/api/v1/has-debt`, {
     headers: {
-      'Authorization': token
+      'Authorization': token,
+      'language': locale
     },
   }).then((response) => {
 
@@ -201,20 +219,22 @@ export const getDebts=(token)=>{
     console.log(error)
   });
 }
-export const isRange=(token,coordinates)=>{
-  return axios.get(`${BASE_URL}/api/v1/dashboard/is-range`,{
-    params:{
-      latitude:coordinates?.latitude,
-      longitude:coordinates?.longitude
+export const isRange=async (token, coordinates) => {
+  const locale = await AsyncStorage.getItem('locale')
+  return axios.get(`${BASE_URL}/api/v1/dashboard/is-range`, {
+    params: {
+      latitude: coordinates?.latitude,
+      longitude: coordinates?.longitude
 
     },
     headers: {
-      'Authorization': token
+      'Authorization': token,
+      'language': locale
     },
   }).then((response) => {
 
     return response.data
   }).catch((error) => {
-    console.log('is range: ',error.response.data.errors[0].message)
+    console.log('is range: ', error.response.data.errors[0].message)
   });
 }

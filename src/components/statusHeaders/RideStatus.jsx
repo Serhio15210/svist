@@ -9,7 +9,7 @@ import {Path, Svg} from "react-native-svg";
 import {useAuth} from "../../provider/AuthProvider";
 
 const RideStatus = ({batteryLevel}) => {
-  const {costSettings}=useAuth()
+  const {costSettings,i18n}=useAuth()
     return (
         <View style={{backgroundColor:'#02C775',...styles.header}}>
             <View style={styles.block}>
@@ -19,7 +19,7 @@ const RideStatus = ({batteryLevel}) => {
                 <Path d="M21.0001 19.11V4.89C21.0001 3.54 20.4301 3 18.9901 3H15.3601C13.9301 3 13.3501 3.54 13.3501 4.89V19.11C13.3501 20.46 13.9201 21 15.3601 21H18.9901C20.4301 21 21.0001 20.46 21.0001 19.11Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </Svg>
 
-              <Text style={styles.text}>Active ride</Text>
+              <Text style={styles.text}>{i18n.t('activeRide')}</Text>
             </View>
           {parseInt(batteryLevel)<=costSettings?.lowPower&&<View style={styles.triangleCorner} />}
           {parseInt(batteryLevel)<=costSettings?.lowPower&&<View style={{backgroundColor:'#EF4E4E',alignItems:'center',justifyContent:'center',position:'absolute',right:0,borderTopRightRadius:25,padding:normalize(16),paddingBottom:normalize(40)}}>

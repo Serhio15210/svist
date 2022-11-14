@@ -27,7 +27,7 @@ const GoogleNumCodeScreen = () => {
     value,
     setValue,
   });
-  const {phone, setPhone, setAuthToken, authToken,isNewUser,setIsAuth,isSent, setIsSent,appToken,user,googleToken, setGoogleToken,authKey,setName,setSurname,setUser} = useAuth()
+  const {phone, setPhone, setAuthToken, authToken,isNewUser,setIsAuth,isSent, setIsSent,appToken,user,googleToken, setGoogleToken,authKey,setName,setSurname,setUser,i18n,setEmail} = useAuth()
   const [resetTime, setResetTime] = useState(30)
   const [reset, setReset] = useState(false)
   const [isValidCode, setIsValidCode] = useState(true)
@@ -92,12 +92,16 @@ const GoogleNumCodeScreen = () => {
         getProfileInfo(authToken).then(res=>{
           console.log(res)
           setUser(res)
+
           if (!res.name){
             setName(res.name.split(' ')[1])
             setSurname(res.name.split(' ')[0])
             navigation.navigate('AboutScreen')
           }else {
-            navigation.navigate('AddPaymentScreen')
+            setName(res?.name)
+            setSurname(res?.surname)
+            setEmail(res?.email)
+            navigation.navigate('FillAgeScreen')
           }
         })
       } else {
@@ -125,8 +129,8 @@ const GoogleNumCodeScreen = () => {
         <AuthBackButton/>
       </TouchableOpacity>
       <View style={{width: '100%'}}>
-        <Text style={styles.title}>Enter the code sms</Text>
-        <Text style={styles.text}>Na telefonní číslo {phone} jsme odeslali sms s potvrzovacím kódem.</Text>
+        <Text style={styles.title}>{i18n.t('enterSms')}</Text>
+        <Text style={styles.text}>{i18n.t('sentSms')}{phone}</Text>
         <CodeField
           ref={ref}
           {...props}
@@ -150,7 +154,7 @@ const GoogleNumCodeScreen = () => {
           )}
         />
         {errorText && <Text style={styles.errorText}>{errorText}</Text>}
-        {error && <Text style={styles.errorText}>Error</Text>}
+        {error && <Text style={styles.errorText}>{i18n.t('error')}</Text>}
         <Text style={{
           alignSelf: 'center',
           color: 'white',
@@ -158,7 +162,7 @@ const GoogleNumCodeScreen = () => {
           fontWeight: '500',fontFamily:GT
         }} onPress={() => {
           resetTime === 0 && setReset(true)
-        }}>{resetTime > 0 ? `Znova zaslať kód o ${resetTime}` : 'Reset Code'}</Text>
+        }}>{resetTime > 0 ? `${i18n.t('resendCodeIn')} ${resetTime}` : i18n.t('resendCode')}</Text>
       </View>
       <TouchableOpacity style={{...styles.centerBlock, marginTop: normalize(18)}} onPress={() => {
         sentCode()
@@ -173,7 +177,7 @@ const GoogleNumCodeScreen = () => {
         <Text style={{
           ...styles.buttonText,
           color: value.length === 4 ? !errorText ? '#FE7B01' : '#EF4E4E' : 'white'
-        }}>Continue</Text>
+        }}>{i18n.t('continue')}</Text>
       </TouchableOpacity>
 
 
@@ -210,7 +214,7 @@ const styles = StyleSheet.create({
     fontFamily: GT
   },
   text: {
-    fontSize: normalize(16), color: 'white', alignSelf: 'center', marginTop: normalize(16)
+    fontSize: normalize(16), color: 'white', alignSelf: 'center', marginTop: normalize(16),fontFamily: GT
   },
   errorText:{
     alignSelf: 'center',

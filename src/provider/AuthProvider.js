@@ -1,7 +1,8 @@
-import React, {useContext, useEffect, useMemo, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {getCostSettings, getFreeRide, getProfileInfo, loginApp} from "../api/authApi";
-import * as RNFS from "expo-file-system";
+import {getCostSettings, loginApp} from "../api/authApi";
+import {eng, sk,   ukr} from "../localizations/localizations";
+import {I18n} from "i18n-js";
 
 const AuthContext = React.createContext(null);
 const AuthProvider = ({children}) => {
@@ -28,78 +29,93 @@ const AuthProvider = ({children}) => {
   const [freeRide, setFreeRide] = useState(false)
   const [costSettings, setCostSettings] = useState({})
   const [seconds, setSeconds] = useState(0);
+  const [isAdded, setIsAdded] = useState(false)
+  const [locale,setLocale]=useState('sk')
+  const translations = {
+    eng: eng,
+    sk:sk,
+    ukr:ukr
+  };
+  const i18n = new I18n(translations);
+  i18n.enableFallback = true;
+  i18n.translations={eng,sk,ukr}
+  i18n.locale=locale
  useEffect(() => {
     setSeconds(costSettings?.max_reserve_minutes * 60)
   }, [costSettings.max_reserve_minutes]);
 
   useEffect(() => {
-    // RNFS.readDirectoryAsync(RNFS.cacheDirectory).then(res=>{
-    //   res.map(item=>{
-    //     if (item.includes('.jpg')){
-    //       console.log(`${RNFS.cacheDirectory}${item}`)
-    //       RNFS.deleteAsync(`${RNFS.cacheDirectory}${item}`, {idempotent: true})
-    //     }
-    //   })
-    // })
+
+
     loginApp().then(res => {
       setAppToken(res?.data?.access_token)
-      AsyncStorage.setItem('appToken', res?.data?.access_token)
+      // AsyncStorage.setItem('appToken', res?.data?.access_token)
     }).catch(e=>{
       console.log('login',e)
     })
     AsyncStorage.getItem('auth').then(res => {
-      if (res === null) {
-        setIsAuth(false)
-      } else if (res) {
+       if (res) {
+         // requestUserPermission(res)
         console.log(res)
         setAuthToken(res)
         setIsAuth(true)
+        getCostSettings(res).then(res => {
+          // console.log(res.data)
+          setCostSettings(res.data)
+        })
       } else {
         setIsAuth(false)
       }
     })
+    AsyncStorage.getItem('locale').then(res => {
+      if (res){
+      if (res==='sk'){
+        setLocale('sk')
+      }else if (res==='eng'){
+        setLocale('eng')
+      }else if (res==='ukr'){
+        setLocale('ukr')
+      }else {
+        setLocale('sk')
+      }
+    }else {
+      AsyncStorage.setItem('locale','sk')
+        setLocale('sk')
+      }
+    })
+
   }, [])
-  useEffect(() => {
-    if (isAuth && authToken !== '') {
-      getProfileInfo(authToken).then(info => {
-        console.log(info)
-        setUser(info)
-      })
-      getCostSettings(authToken).then(res => {
-        // console.log(res.data)
-        setCostSettings(res.data)
-      })
-    }
-    // AsyncStorage.getItem('appToken').then(res=> {
-    //   if (res){
-    //     setAppToken(res)
-    //   }else {
-    //     loginApp().then(res => {
-    //       // console.log(res.data)
-    //       setAppToken(res.data.access_token)
-    //       AsyncStorage.setItem('appToken', res.data.access_token)
-    //     })
-    //   }
-    //
-    // })
-  }, [isAuth, authToken])
-
-  useEffect(() => {
-    if (authToken) {
-      const interval = setInterval(() => {
-        getCostSettings(authToken).then(res => {
-          // console.log(res.data)
-          setCostSettings(res.data)
-        })
-
-      }, 1000)
-      return (() => clearInterval(interval))
-    }
-  }, [authToken])
+  // useEffect(() => {
+  //   if (isAuth && authToken !== '') {
+  //     getProfileInfo(authToken).then(info => {
+  //       // console.log(info)
+  //       setUser(info)
+  //     })
+  //
+  //   }
+  //
+  // }, [isAuth, authToken])
+  // if (loading) {
+  //   return null;
+  // }
+  // useEffect(() => {
+  //   if (authToken) {
+  //     const interval = setInterval(() => {
+  //       getCostSettings(authToken).then(res => {
+  //         console.log(res.data)
+  //         setCostSettings(res.data)
+  //       })
+  //
+  //     }, 1000)
+  //     return (() => clearInterval(interval))
+  //   }
+  // }, [authToken])
 
 
   return (
     <AuthContext.Provider value={{
+      i18n,
+      locale,setLocale,
       user,
       setUser,
       userCards,
@@ -131,7 +147,7 @@ const AuthProvider = ({children}) => {
       googleToken,
       setGoogleToken,
       seconds, setSeconds,
-      authKey, setAuthKey
+      authKey, setAuthKey,isAdded, setIsAdded
     }}>
       {children}
     </AuthContext.Provider>

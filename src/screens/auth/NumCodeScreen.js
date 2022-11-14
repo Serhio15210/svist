@@ -20,7 +20,7 @@ const NumCodeScreen = () => {
     value,
     setValue,
   });
-  const {phone, setPhone, setAuthToken, authToken,isNewUser,setIsAuth,isSent, setIsSent,appToken} = useAuth()
+  const {phone, setPhone, setAuthToken, authToken,isNewUser,setIsAuth,isSent, setIsSent,appToken,i18n} = useAuth()
   const [resetTime, setResetTime] = useState(30)
   const [reset, setReset] = useState(false)
   const [isValidCode, setIsValidCode] = useState(true)
@@ -102,8 +102,8 @@ const NumCodeScreen = () => {
         <AuthBackButton/>
       </TouchableOpacity>
       <View style={{width: '100%'}}>
-        <Text style={styles.title}>Enter the code sms</Text>
-        <Text style={styles.text}>Na telefonní číslo {phone} jsme odeslali sms s potvrzovacím kódem.</Text>
+        <Text style={styles.title}>{i18n.t('enterSms')}</Text>
+        <Text style={styles.text}>{i18n.t('sentSms')}{phone}</Text>
         <CodeField
           ref={ref}
           {...props}
@@ -127,7 +127,7 @@ const NumCodeScreen = () => {
           )}
         />
         {errorText && <Text style={styles.errorText}>{errorText}</Text>}
-        {error && <Text style={styles.errorText}>Error</Text>}
+        {error && <Text style={styles.errorText}>{i18n.t('error')}</Text>}
         <Text style={{
           alignSelf: 'center',
           color: 'white',
@@ -135,7 +135,7 @@ const NumCodeScreen = () => {
           fontWeight: '500',fontFamily:GT
         }} onPress={() => {
           resetTime === 0 && setReset(true)
-        }}>{resetTime > 0 ? `Znova zaslať kód o ${resetTime}` : 'Reset Code'}</Text>
+        }}>{resetTime > 0 ? `${i18n.t('resendCodeIn')} ${resetTime}` : i18n.t('resendCode')}</Text>
       </View>
       <TouchableOpacity style={{...styles.centerBlock, marginTop: normalize(18)}} onPress={() => {
         sentCode()
@@ -150,7 +150,7 @@ const NumCodeScreen = () => {
         <Text style={{
           ...styles.buttonText,
           color: value.length === 4 ? !errorText ? '#FE7B01' : '#EF4E4E' : 'white'
-        }}>Continue</Text>
+        }}>{i18n.t('continue')}</Text>
       </TouchableOpacity>
 
 
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     fontFamily: GT
   },
   text: {
-    fontSize: normalize(16), color: 'white', alignSelf: 'center', marginTop: normalize(16)
+    fontSize: normalize(16), color: 'white', alignSelf: 'center', marginTop: normalize(16),fontFamily: GT
   },
   errorText:{
     alignSelf: 'center',

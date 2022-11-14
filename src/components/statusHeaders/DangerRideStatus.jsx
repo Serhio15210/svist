@@ -7,12 +7,12 @@ import {styles} from "./statusHeaderStyle"
 import LowBattery from "../../../assets/lowBattery.svg";
 import {useAuth} from "../../provider/AuthProvider";
 const DangerRideStatus = ({batteryLevel}) => {
-  const {costSettings}=useAuth()
+  const {costSettings,i18n}=useAuth()
     return (
         <View  style={{...styles.header,backgroundColor: '#EF4E4E'}}>
             <View style={styles.block}>
                 <AntDesign name={'infocirlceo'} style={{fontSize: normalize(24),color:'white'}}/>
-                <Text style={styles.text}>Jazda v zakázanej zóne</Text>
+                <Text style={styles.text}>{i18n.t('dangerDriving')}</Text>
             </View>
           {parseInt(batteryLevel)<=costSettings?.lowPower&&<View style={styles.triangleCorner} />}
           {parseInt(batteryLevel)<=costSettings?.lowPower&&<View style={{backgroundColor:'#EF4E4E',alignItems:'center',justifyContent:'center',position:'absolute',right:0,borderTopRightRadius:25,padding:normalize(16),paddingBottom:normalize(40)}}>

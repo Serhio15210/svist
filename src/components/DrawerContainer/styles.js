@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
     paddingTop: normalize(50)
   },
   label:{
-    position:'absolute',width:normalize(90),height:normalize(48),right:normalize(-107),zIndex:-1
+    position:'absolute',width:normalize(90),height:normalize(48),left:'108.7%',zIndex:-1
   },
   rowContainer:{
     flexDirection:'row',alignItems:'center'
@@ -22,7 +22,7 @@ export const styles = StyleSheet.create({
     flexDirection:'row',alignItems:'center',marginTop:normalize(40)
   },
   menuItemText:{
-    color:'#1F1E1D',fontSize:normalize(16),marginLeft:normalize(18),fontFamily:GT_BOLD
+    color:'#1F1E1D',fontSize:normalize(16),marginLeft:normalize(15),fontFamily:GT_BOLD
   },
   languageBlock:{
     alignItems:'center',justifyContent:'center', left:0,position:'absolute',bottom:normalize(80)

@@ -12,6 +12,7 @@ import scannerBg from "../../../assets/scannerBg.png";
 import ScannedLamp from "../../../assets/scannedLamp.svg";
 import {Camera} from "expo-camera";
 import {useNavigation} from "@react-navigation/native";
+import {useAuth} from "../../provider/AuthProvider";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 const SCREEN_WIDTH = Dimensions.get("window").width;
@@ -22,6 +23,7 @@ const CameraModal = ({isOpen, setIsOpen, picture, setPicture}) => {
   const [openHowToPark, setOpenHowToPark] = useState(false)
   const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off)
   const navigation=useNavigation()
+  const {i18n}=useAuth()
   const captureHandle = async () => {
     try {
       const data = await cameraRef.current.takePictureAsync({quality: 0.5, base64: true});
@@ -71,7 +73,7 @@ const CameraModal = ({isOpen, setIsOpen, picture, setPicture}) => {
                    <HowToPark width={normalize(185)} height={normalize(48)}/>
                    <TouchableOpacity style={{position: 'absolute', flexDirection: 'row', alignItems: 'center'}}
                                       onPress={() => setOpenHowToPark(true)}>
-                     <Text style={styles.howToParkText} numberOfLines={1} adjustsFontSizeToFit={true}>How to park?</Text>
+                     <Text style={styles.howToParkText} numberOfLines={1} adjustsFontSizeToFit={true}>{i18n.t('howPark')}?</Text>
                       {/*<Feather name={'info'} style={{color: 'white', fontSize: normalize(20)}}/>*/}
                     </TouchableOpacity>
 
@@ -90,7 +92,7 @@ const CameraModal = ({isOpen, setIsOpen, picture, setPicture}) => {
                   {flashMode === Camera.Constants.FlashMode.torch ? <ScannedLamp onPress={__handleFlashMode}/> : <UnScannedLamp onPress={__handleFlashMode}/>}
                 </View>
 
-                <Text style={styles.text} numberOfLines={1} adjustsFontSizeToFit={true}>Watchout for your parking!</Text>
+                <Text style={styles.text} numberOfLines={1} adjustsFontSizeToFit={true}>{i18n.t('watchOutParking')}</Text>
              </View>
         </View>
       </Camera>

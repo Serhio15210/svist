@@ -1,5 +1,6 @@
 import {ACCESS_TOKEN, BASE_URL} from "./apiKeys";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const loginApp = () => {
   return axios.post(`${BASE_URL}/api/v1/login-app`, {
@@ -12,13 +13,31 @@ export const loginApp = () => {
     console.log(error)
   });
 }
+export const safeFirebaseToken = (token,authToken) => {
+  console.log(token,authToken)
+  return axios.post(`${BASE_URL}/api/v1/save-firebase-token`, {
+    fire_base_token:token
+  },{
+    'access-token': authToken,
+    headers:{
+      'device-id':12
+    }
+  },).then((response) => {
+    return response?.data
+  }).catch((error) => {
+    console.log(error)
+  });
+}
 export const validationPhone = async (phone,token) => {
   console.log(phone,token)
+  const locale=await AsyncStorage.getItem('locale')
+  console.log(locale)
   return axios.post(`${BASE_URL}/api/v1/validation-phone`, {
     "phone_number": phone
   }, {
     headers: {
-      'access-token': token
+      'access-token': token,
+      'language':locale
     },
   }).then((response) => {
 
@@ -48,12 +67,15 @@ export const validationAppleGoogle = async (token,service) => {
 }
 export const validationCode = async (phone, code,token) => {
   console.log(phone,code,token)
+  const locale=await AsyncStorage.getItem('locale')
+  console.log(locale)
   return axios.post(`${BASE_URL}/api/v1/validation-code`, {
     "phone_number": phone,
     "sms_code": code
   }, {
     headers: {
-      'access-token': token
+      'access-token': token,
+      'language':locale
     },
   }).then((response) => {
 
@@ -79,8 +101,10 @@ export const validationGoogleCode = async (phone, code,token,key) => {
     return error.response.data.errors[0].message
   });
 }
-export const profileUpdate = (name, surname, email, age, token) => {
-  console.log(token)
+export const profileUpdate = async (name, surname, email, age, token) => {
+  console.log('age',email, age)
+  const locale = await AsyncStorage.getItem('locale')
+
   return axios.put(`${BASE_URL}/api/v1/profile/update`, {
     "name": name,
     "surname": surname,
@@ -88,19 +112,22 @@ export const profileUpdate = (name, surname, email, age, token) => {
     "birth_date": age
   }, {
     headers: {
-      'Authorization': token
+      'Authorization': token,
+      'language':locale
     },
   }).then((response) => {
-    console.log(response.data.data)
+    // console.log(response.data.data)
     return response
   }).catch((error) => {
-    console.log(error)
+    return error.response.data.errors[0].message
   });
 }
-export const getProfileInfo = (token) => {
+export const getProfileInfo = async (token) => {
+  const locale = await AsyncStorage.getItem('locale')
   return axios.get(`${BASE_URL}/api/v1/profile/get-info`, {
     headers: {
-      'access-token': token
+      'access-token': token,
+      'language':locale
     },
   }).then((response) => {
     return response.data.data
@@ -108,10 +135,12 @@ export const getProfileInfo = (token) => {
     console.log(error)
   });
 }
-export const createCard = (token) => {
+export const createCard = async (token) => {
+  const locale = await AsyncStorage.getItem('locale')
   return axios.post(`${BASE_URL}/api/v1/create-card`, {}, {
     headers: {
-      'access-token': token
+      'access-token': token,
+      'language':locale
     },
   }).then((response) => {
     return response
@@ -131,10 +160,12 @@ export const profileGetInfo = (token) => {
     console.log(error)
   });
 }
-export const getCards = (token) => {
+export const getCards = async (token) => {
+  const locale = await AsyncStorage.getItem('locale')
   return axios.get(`${BASE_URL}/api/v1/cards`, {
     headers: {
-      'Authorization': token
+      'Authorization': token,
+      'language':locale
     },
   }).then((response) => {
 
@@ -144,9 +175,14 @@ export const getCards = (token) => {
   });
 }
 export const getCostSettings = (token) => {
+  let locale=''
+  AsyncStorage.getItem('locale').then(res=>{
+    locale=res
+  })
   return axios.get(`${BASE_URL}/api/v1/dashboard/cost-settings`, {
     headers: {
-      'Authorization': token
+      'Authorization': token,
+      'language':locale
     },
   }).then((response) => {
     return response.data

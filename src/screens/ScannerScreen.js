@@ -1,12 +1,10 @@
 import React, {useEffect, useRef, useState} from "react";
-import {Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, Vibration, View} from "react-native";
+import {Dimensions, ImageBackground, Linking, StyleSheet, Text, TouchableOpacity, Vibration, View} from "react-native";
 import {normalize} from "../responsive/fontSize";
 import BackPath from "../../assets/backPath.svg";
 import UnScannedLamp from "../../assets/unScannedLamp.svg";
 import ScannedLamp from "../../assets/scannedLamp.svg";
 import scannerBg from "../../assets/scannerBg.png";
-
-import Feather from "react-native-vector-icons/Feather";
 import {useNavigation} from "@react-navigation/native";
 import AllowCameraModal from "../components/AllowCameraModal";
 
@@ -19,7 +17,7 @@ import ErrorModal from "../components/ErrorModal/ErrorModal";
 import {BarCodeScanner} from 'expo-barcode-scanner';
 import {Camera} from 'expo-camera';
 import {useSvistContext} from "../provider/SvistProvider";
-
+import { useLinkTo } from '@react-navigation/native';
 const scanBarWidth = SCREEN_WIDTH * 0.46; // this is equivalent to 180 from a 393 device width
 const scanBarHeight = SCREEN_WIDTH * 0.0025; //this is equivalent to 1 from a 393 device width
 const scanBarColor = "#22ff00";
@@ -28,10 +26,10 @@ const SCREEN_WIDTH = Dimensions.get("window").width;
 const ScannerScreen = () => {
   const navigation = useNavigation()
   const cameraRef=useRef()
-  // const [value, setValue] = useState('');
+  const linkTo = useLinkTo();
   const [scanned, setScanned] = useState(false)
   const [disableScan, setDisableScan] = useState(false)
-  const {authToken,setSeconds,costSettings }=useAuth()
+  const {authToken,setSeconds,costSettings,i18n }=useAuth()
   const [cameraAllow, setCameraAllow] = useState(false)
   const [errorScan, setErrorScan] = useState(false)
   const [enterCode, setEnterCode] = useState(false)
@@ -40,7 +38,7 @@ const ScannerScreen = () => {
   const [error, setError] = useState('')
   const [grant, setGrant] = useState('granted')
   const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off)
-  const [hasPermission, setHasPermission] = useState(null);
+  const [status, setStatus] = useState({});
   const {reservation, setReservation}=useSvistContext()
   const tripStart=(value)=>{
     console.log(value)
@@ -89,7 +87,6 @@ const ScannerScreen = () => {
 
   }
   useEffect(()=>{
-    console.log('error',errorOpen)
     if(!errorOpen){
       setScanned(!scanned)
       setDisableScan(false)
@@ -98,6 +95,9 @@ const ScannerScreen = () => {
   const checkPermission = () => {
     const [status, requestPermission] = Camera.useCameraPermissions()
     console.log('status',status)
+    requestPermission().then(res=>{
+      console.log('r',res)
+    })
 
   }
   let permModal=useRef()
@@ -116,9 +116,10 @@ const ScannerScreen = () => {
     Camera.getCameraPermissionsAsync().then(res=>{
       if (res.granted){
         setCameraAllow(false)
-      }else {
+      } else {
         setCameraAllow(true)
       }
+
     })
   }, [])
   // useEffect(()=>{
@@ -137,7 +138,7 @@ const ScannerScreen = () => {
     <View style={{flex:1}}>
       {errorScan && <ScanErrorModal setIsOpen={setErrorScan} isOpen={errorScan}/>}
       {enterCode && <EnterCodeModal setIsOpen={setEnterCode} isOpen={enterCode}/>}
-      {cameraAllow && <AllowCameraModal setIsOpen={setCameraAllow} isOpen={cameraAllow} checkPermission={checkPermission}/>}
+      {cameraAllow && <AllowCameraModal setIsOpen={setCameraAllow} isOpen={cameraAllow} checkPermission={checkPermission} />}
       {errorOpen&&<ErrorModal setIsOpen={setErrorOpen} isOpen={errorOpen} errorText={error}/>}
       {cameraAllow?
         <View style={{flex: 1, alignItems: 'center', justifyContent: 'center',backgroundColor:'black'}}>
@@ -154,7 +155,7 @@ const ScannerScreen = () => {
           <View style={styles.bottomOverlay}>
             {flashMode === Camera.Constants.FlashMode.torch ? <ScannedLamp onPress={__handleFlashMode}/> : <UnScannedLamp onPress={__handleFlashMode}/>}
             <Text style={{color: 'white', fontSize: normalize(16), marginTop: normalize(70)}}
-                  onPress={() => setEnterCode(true)}>Enter code instead</Text>
+                  onPress={() => setEnterCode(true)}>{i18n.t('enterCodeManually')}</Text>
           </View>
         </View>
        :
@@ -190,8 +191,11 @@ const ScannerScreen = () => {
                            resizeMode="cover"/>
           <View style={styles.bottomOverlay}>
             {flashMode === Camera.Constants.FlashMode.torch ? <ScannedLamp onPress={__handleFlashMode}/> : <UnScannedLamp onPress={__handleFlashMode}/>}
-            <Text style={{color: 'white', fontSize: normalize(16), marginTop: normalize(70)}}
-                  onPress={() => setEnterCode(true)}>Enter code instead</Text>
+            <TouchableOpacity onPress={() => setEnterCode(true)} style={{ marginTop: normalize(70)}}>
+              <Text style={{color: 'white', fontSize: normalize(16)}}
+                     >{i18n.t('enterCodeManually')}</Text>
+            </TouchableOpacity>
+
           </View>
         </View>
       </Camera>}

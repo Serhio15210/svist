@@ -18,6 +18,20 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  rowBetween:{
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: 'space-between'
+  },
+  reserveRowBetween:{
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: 'space-between',
+    width: "100%",
+    borderBottomWidth: 1,
+    borderColor: "#EDEDF1",
+    paddingBottom: normalize(14),
+  },
   reserveBlock: {
     backgroundColor: "white",
     borderRadius: 25,

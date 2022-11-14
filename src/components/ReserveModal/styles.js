@@ -57,6 +57,12 @@ export const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  rowBetween:{
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+  },
   infoContainer:{
     flexDirection: "row",
     alignItems: "center",
@@ -82,6 +88,7 @@ export const styles = StyleSheet.create({
   cardDot: {
     width: 4, height: 4, backgroundColor: "#1F1E1D", borderRadius: 10, marginRight: normalize(5)
   },
+
   reserveButton: {
     borderColor: 'rgba(254, 123, 1, 0.24)',
     borderWidth: 1,
@@ -98,5 +105,24 @@ export const styles = StyleSheet.create({
     fontFamily: GT,
     fontWeight: '500',
     fontSize: normalize(24)
+  },
+  addCardButton:{
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    alignSelf: 'center',
+    marginTop: normalize(35)
+},
+  addCardText:{
+    color:'#FE7B01',fontSize:normalize(16)
+  },
+  cardTypeImg:{
+    width: normalize(26), height: normalize(17), marginRight: normalize(20)
+  },
+  walletImg:{
+    width: normalize(24), height: normalize(24), marginLeft: normalize(15)
+  },
+  scooterImg:{
+    width: normalize(48), height: normalize(48)
   }
 });

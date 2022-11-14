@@ -7,7 +7,11 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import ModalButton from "../../../assets/modalButton.svg";
 import parkingZone from "../../../assets/parkingZone.png"
 import {styles} from "./styles";
-const ParkingZoneInfoModal = ({setIsOpen, isOpen}) => {
+import CloseIcon from "../../../assets/closeIcon.svg";
+import {useAuth} from "../../provider/AuthProvider";
+import CloseButton from "../CloseButton";
+const ParkingZoneInfoModal = ({setIsOpen, isOpen }) => {
+  const {i18n}=useAuth()
   return (
     <Modal
       animationType="slide"
@@ -17,9 +21,7 @@ const ParkingZoneInfoModal = ({setIsOpen, isOpen}) => {
         setIsOpen(!isOpen);
       }}>
       <View style={styles.container}>
-        <AntDesign name={'closesquareo'}
-                   style={{position: 'absolute', top: 30, right: 20, fontSize: 24, color: 'white'}}
-                   onPress={() => setIsOpen(false)}/>
+        <CloseButton onPress={() => setIsOpen(false)}/>
         <View style={{width: '100%'}}>
           <Image source={parkingZone}
                  style={{width: '100%', height: normalize(280), borderTopRightRadius: 25, borderTopLeftRadius: 25}}/>
@@ -29,13 +31,16 @@ const ParkingZoneInfoModal = ({setIsOpen, isOpen}) => {
               <MaterialIcons name={'local-parking'}
                              style={{fontSize: normalize(24), color: 'white', position: 'absolute'}}/>
             </View>
-            <Text style={styles.title}>This is parking area</Text>
-            <Text style={styles.text}>Here you can see how parking area looks like. Please find one nearby.</Text>
+            <Text style={styles.title}>{i18n.t('thisIsParkingZone')}</Text>
+            <Text style={styles.text}>{i18n.t('parkingAreaLook')}</Text>
             <TouchableOpacity
               style={styles.button}
-              onPress={() => setIsOpen(false)}>
+              onPress={() => {
+
+                setIsOpen(false)
+              }}>
               <ModalButton width={normalize(326)} height={normalize(56)}/>
-              <Text style={styles.buttonText}>Continue</Text>
+              <Text style={styles.buttonText}>{i18n.t('continue')}</Text>
             </TouchableOpacity>
           </View>
         </View>

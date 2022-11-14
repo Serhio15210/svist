@@ -1,15 +1,17 @@
 import React from 'react';
-import {Modal, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import AntDesign from "react-native-vector-icons/AntDesign";
+import {Modal, Text, TouchableOpacity, View} from "react-native";
 import {styles} from "./styles"
 import {normalize} from "../../responsive/fontSize";
 import ReserveButton from "../../../assets/reserveButton.svg";
 import AddCard from "../../../assets/addCard.svg";
-import Svg, {Mask, Path} from "react-native-svg";
 import {useNavigation} from "@react-navigation/native";
+import CloseIcon from "../../../assets/closeIcon.svg";
+import {useAuth} from "../../provider/AuthProvider";
+import CloseButton from "../CloseButton";
 
 const AddCardModal = ({setIsOpen, isOpen,setIsAdded}) => {
   const navigation=useNavigation()
+  const {i18n}=useAuth()
   return (
     <Modal
       animationType="slide"
@@ -19,22 +21,19 @@ const AddCardModal = ({setIsOpen, isOpen,setIsAdded}) => {
         setIsOpen(!isOpen);
       }}>
       <View style={styles.container}>
-        <AntDesign name={'closesquareo'}
-                   style={{position: 'absolute', top: 30, right: 20, fontSize: 24, color: 'white'}}
-                   onPress={() => setIsOpen(false)}/>
+        <CloseButton onPress={() => setIsOpen(false)}/>
+
         <View style={styles.modalBlock}>
           <AddCard style={{marginBottom: normalize(24)}}/>
-
-
-          <Text style={styles.title}>Before your ride</Text>
-          <Text style={styles.text}>Enter your card details to start the ride.</Text>
+          <Text style={styles.title}>{i18n.t('beforeYourRide')}</Text>
+          <Text style={styles.text}>{i18n.t('enterYourCardDetails')}</Text>
           <TouchableOpacity style={styles.button} onPress={() => {
-            setIsAdded(true)
+            // setIsAdded(true)
             setIsOpen(false)
             navigation.navigate('AddNewCardScreen')
           }}>
              <ReserveButton/>
-            <Text style={styles.buttonText}>Add a card</Text>
+            <Text style={styles.buttonText}>{i18n.t('addCard')}</Text>
 
 
           </TouchableOpacity>

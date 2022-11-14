@@ -8,12 +8,13 @@ import AuthWhiteButton from "../../../assets/authWhiteButton.svg";
 import OutlineButton from "../../../assets/outlineButton.svg";
 import {profileUpdate} from "../../api/authApi";
 import AuthBackButton from "../../../assets/authBackButton.svg";
-import {GT} from "../../constants/fonts";
+import {GT, GT_BOLD} from "../../constants/fonts";
 
 const FillEmailScreen = () => {
-  const {name, setName, setSurname, surname, setEmail, email, authToken} = useAuth()
+  const {name, setName, setSurname, surname, setEmail, email, authToken,i18n} = useAuth()
   const [errorEmail, setErrorEmail] = useState(false)
   const [focusEmail, setFocusEmail] = useState(false)
+  const [errorText, setErrorText] = useState('')
   const navigation = useNavigation()
 
   const validateEmail = () => {
@@ -23,45 +24,54 @@ const FillEmailScreen = () => {
   };
 
   const sendInfo = () => {
-    profileUpdate(name, surname, email, '', authToken).then(res => {
-      res?.data?.data?.success ? navigation.navigate('FillAgeScreen') : setErrorEmail(true)
-    })
+    if (email) {
+      profileUpdate(name, surname, email, '', authToken).then(res => {
+        if (res?.data?.data?.success) {
+          setErrorText('')
+          navigation.navigate('FillAgeScreen')
+
+        } else {
+          setErrorText(res)
+        }
+
+      })
+    }
   }
   return (
     // <ScrollView style={{flex:1}} scrollEnabled={focusEmail}>
     <Pressable onPress={Keyboard.dismiss} style={{flex:1}}>
-    <View style={{...styles.container, backgroundColor: errorEmail ? '#EF4E4E' : '#FE7B01'}}>
+    <View style={{...styles.container, backgroundColor: errorText ? '#EF4E4E' : '#FE7B01'}}>
       <TouchableOpacity style={{position: 'absolute', left: 0, top: normalize(48)}} onPress={() => navigation.goBack()}>
         <AuthBackButton/>
       </TouchableOpacity>
       <View style={{width: '100%', marginBottom: normalize(24)}}>
-        <Text style={styles.title}>Fill in your email</Text>
-        <Text style={styles.text}>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas risus
-          pellentesque.</Text>
+        <Text style={styles.title}>{i18n.t('enterEmail')}</Text>
+        <Text style={styles.text}>{i18n.t('enterValidEmail')}</Text>
 
         <TouchableOpacity
           style={{justifyContent: 'center', alignItems: 'flex-start', marginTop: normalize(40), width: '100%'}}>
           {focusEmail ? <OutlineButton width={'100%'}/> : <OutlineButton opacity={'0.24'} width={'100%'}/>}
-          <TextInput placeholder={'Fill in an e-mail'} style={styles.input} placeholderTextColor={'white'}
+          <TextInput placeholder={i18n.t('fillEmail')} style={styles.input} placeholderTextColor={'white'}
                      onChangeText={(e) => setEmail(e)} value={email} onFocus={() => setFocusEmail(true)}
                      onBlur={() => setFocusEmail(false)}/>
-          {errorEmail && <ErrorIcon style={{position: 'absolute', right: normalize(34)}}/>}
+          {errorText && <ErrorIcon style={{position: 'absolute', right: normalize(34)}}/>}
         </TouchableOpacity>
-        {errorEmail && <Text style={styles.errorText}>The email you entered was incorrect.</Text>}
+        {errorText && <Text style={styles.errorText}>{errorText}</Text>}
       </View>
       <TouchableOpacity style={{...styles.centerBlock}} onPress={() => {
-        if (validateEmail()) {
-          setErrorEmail(false)
-          sendInfo()
-        } else {
-          setErrorEmail(true)
-        }
+        // if (validateEmail()) {
+        //   setErrorEmail(false)
+        //   sendInfo()
+        // } else {
+        //   setErrorEmail(true)
+        // }
+        sendInfo()
       }}>
         {email ? <AuthWhiteButton/> : <OutlineButton/>}
         <Text style={{
           ...styles.buttonText,
-          color: errorEmail ? email ? '#EF4E4E' : 'white' : email ? '#FE7B01' : 'white'
-        }}>Continue</Text>
+          color: errorText ? email ? '#EF4E4E' : 'white' : email ? '#FE7B01' : 'white'
+        }}>{i18n.t('continue')}</Text>
       </TouchableOpacity>
 
 
@@ -100,7 +110,7 @@ const styles = StyleSheet.create({
     fontFamily: GT
   },
   text: {
-    fontSize: normalize(16), color: 'white', alignSelf: 'center', marginTop: normalize(16)
+    fontSize: normalize(16), color: 'white', marginTop: normalize(16)
   },
   input: {
     position: 'absolute',
@@ -114,7 +124,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: normalize(16),
     marginTop: normalize(16),
-    fontFamily: GT
+    fontFamily: GT,
+    fontWeight:'500',
+    textAlign:'center'
   }
 })
 

@@ -58,8 +58,8 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
-    position: 'absolute',
-    bottom: normalize(60),
+    marginBottom:normalize(100),
+    marginTop:normalize(20),
     alignSelf: 'center'
   },
   buttonText:{

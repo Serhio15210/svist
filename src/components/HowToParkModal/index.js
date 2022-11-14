@@ -6,7 +6,11 @@ import ModalHeader from "../../../assets/modalHeader.svg";
 import ModalButton from "../../../assets/modalButton.svg";
 import HowToParkLogo from "../../../assets/howToParkLogo.svg";
 import {styles} from "./styles";
+import CloseIcon from "../../../assets/closeIcon.svg";
+import {useAuth} from "../../provider/AuthProvider";
+import CloseButton from "../CloseButton";
 const HowToParkModal = ({setIsOpen, isOpen}) => {
+  const {i18n}=useAuth()
   return (
     <Modal
       animationType="slide"
@@ -16,26 +20,20 @@ const HowToParkModal = ({setIsOpen, isOpen}) => {
         setIsOpen(!isOpen);
       }}>
       <View style={styles.container}>
-        <AntDesign name={'closesquareo'}
-                   style={{position: 'absolute', top: 30, right: 20, fontSize: normalize(24), color: 'white'}}
-                   onPress={() => setIsOpen(false)}/>
+        <CloseButton onPress={() => setIsOpen(false)}/>
         <View style={styles.modalBlock}>
           <View style={styles.logoBlock}>
             <ModalHeader width={normalize(58)} height={normalize(48)}/>
             <HowToParkLogo style={{position: 'absolute'}}/>
           </View>
 
-          <Text style={styles.title}>How to park</Text>
-          <Text style={styles.text} adjustsFontSizeToFit={true}>We're committed to keeping the city lean and tidy. We
-            ask you to do the same and verify it by taking a photo of your parking. Don't block pathways, entrances, or
-            bike lanes. Try to park near bike racks or designated parking areas painted on the street. Frequent
-            violation of our parking guidelines we result in an extra charge or even deactivation of your
-            account.</Text>
+          <Text style={styles.title}>{i18n.t('howPark')}</Text>
+          <Text style={styles.text} adjustsFontSizeToFit={true}>{i18n.t('howParkText')}</Text>
           <TouchableOpacity
             style={styles.button}
             onPress={() => setIsOpen(false)}>
             <ModalButton width={normalize(326)} height={normalize(56)}/>
-            <Text style={styles.buttonText}>I understand</Text>
+            <Text style={styles.buttonText}>{i18n.t('iUnderstand')}</Text>
 
 
           </TouchableOpacity>

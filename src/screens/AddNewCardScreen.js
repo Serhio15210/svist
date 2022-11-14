@@ -14,9 +14,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import PaymentModal from "../components/PaymentModal/PaymentModal";
 import {GT} from "../constants/fonts";
 
-const AddNewCardScreen = ({setAddCard}) => {
+const AddNewCardScreen = () => {
   const {
-    authToken,
+    authToken,i18n,isAdded, setIsAdded
   } = useAuth();
   const [errorEmail, setErrorEmail] = useState(false);
   const [focusNumber, setFocusNumber] = useState(false);
@@ -37,6 +37,7 @@ const AddNewCardScreen = ({setAddCard}) => {
         // Linking.openURL(res.data.data.url).catch((err) =>
         //   console.error('An error occurred', err),
         // );
+        console.log(res?.data?.data?.url)
         setUrl(res?.data?.data?.url)
         setClose(true)
         getCards(authToken).then((card) => {
@@ -60,6 +61,7 @@ const AddNewCardScreen = ({setAddCard}) => {
           setCardId('')
           setTryCount(0)
           setUrl('')
+          setIsAdded(true)
           navigation.goBack()
         } else {
           setTryCount(tryCount + 1)
@@ -95,17 +97,16 @@ const AddNewCardScreen = ({setAddCard}) => {
       }}>
       {close&&url &&<PaymentModal isOpen={close} setIsOpen={setClose} url={url} setUrl={setUrl} />}
       {openLoading&&!close && <LoadingModal setOpenLoading={setOpenLoading}/>}
-      {openError && !openLoading&&<ErrorModal isOpen={openError} setIsOpen={setOpenError} errorText={'Ошибка при добавлении карты'}/>}
+      {/*{openError && !openLoading&&<ErrorModal isOpen={openError} setIsOpen={setOpenError} errorText={i18n.t('arrorAddingCard')}/>}*/}
       <TouchableOpacity
         style={{position: 'absolute', left: 0, top: normalize(48)}}
         onPress={() => navigation.goBack()}>
         <AuthBackButton/>
       </TouchableOpacity>
       <View style={{width: '100%'}}>
-        <Text style={styles.title}>Fill in age</Text>
+        <Text style={styles.title}>{i18n.t('addPaymentCard')}</Text>
         <Text style={styles.text}>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Egestas
-          risus pellentesque.
+          {i18n.t('enterYourCardDetails')}
         </Text>
         <CreditCard
           style={{marginTop: normalize(40), alignSelf: 'center'}}
@@ -123,7 +124,7 @@ const AddNewCardScreen = ({setAddCard}) => {
             ...styles.buttonText,
             color: 'white',
           }}>
-          Add a new card
+          {i18n.t('addCard')}
         </Text>
       </TouchableOpacity>
     </View>
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
   text: {
     fontSize: normalize(16),
     color: 'white',
-    alignSelf: 'center',
+    fontFamily: GT,
     marginTop: normalize(16),
   },
   input: {
